@@ -14,7 +14,6 @@ int main()
 {
     // This program prints "Hello, World!" to the console.
     player("John Doe", 25);
-    player("Jane Smith", 30);
     try
     {
         player("bobi", 0.58);
