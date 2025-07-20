@@ -1,12 +1,17 @@
-#include <queue>
+
 #include <stdexcept>
-#include "Can.hpp"
+#include <vector>
 #include "CanManager.hpp"
 #include <iostream>
+#include "Can.hpp"
 
 Can::Can()
 {
-    // Constructor implementation
+    CanFrame frame;
+    frame.canId = 0; // Initialize with default values
+    frame.dlc = 0;
+    frame.data.resize(8, 0); // Resize to 8 bytes with default value
+    frameQueue.push(frame);
 }
 
 void Can::sendFrame(uint32_t id, const std::vector<uint8_t> &data)

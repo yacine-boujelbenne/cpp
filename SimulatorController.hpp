@@ -2,24 +2,24 @@
 #include <memory>
 #include <vector>
 #include "CanBus.hpp"
+#include "Ecu.hpp"
+#include <time.h>
+
 #ifndef _SIMULATION_MANAGER_HPP
 #define _SIMULATION_MANAGER_HPP
 
 class SimulationManager
 {
     CanBus bus;
-    std::vector<std::unique_ptr<CanTpSession>> nodes;
+    long silenceTime = time(nullptr);
+    // std::vector<std::unique_ptr<CanTpSession>> nodes;
 
 public:
-    void addNode(uint32_t txId, uint32_t rxId)
-    {
-        nodes.push_back(std::make_unique<CanTpSession>(txId, rxId));
-    }
-    void run()
-    {
-        // Simulate event loop with timing
-        // Process frames, timeouts, etc.
-    }
+    void addNode(uint32_t txId, uint32_t rxId);
+    void runSimulation(Ecu &ecu);
+    void createNewEcu();
+    void initializer();
+    void showResults(const Ecu &ecu);
 };
 
 #endif // _SIMULATION_MANAGER_HPP

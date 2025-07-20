@@ -1,6 +1,5 @@
 #include <queue>
 #include <stdexcept>
-#include "Frame.hpp"
 #include <vector>
 #include "CanManager.hpp"
 #include <iostream>
