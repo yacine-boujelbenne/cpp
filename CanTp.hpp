@@ -1,53 +1,77 @@
 #ifndef _CANTP_
 #define _CANTP_
 #include "TransportProtocol.hpp"
-
-struct
+#include <cstdint>
+#include <vector>
+#include <string>
+#include "Can.hpp"
+/*
+struct singleFrame
 {
     uint32_t id;
     uint8_t data[8];
     bool ack;
 };
-typedef singleFrame;
+typedef singleFrame singleFrame;
 
-struct
+struct firstFrame
 {
     uint32_t id;
     uint8_t data[8];
     bool ack;
 };
-typedef firstFrame;
+typedef firstFrame firstFrame;
 
-struct
+struct consectiveFrame
 {
     uint32_t id;
     uint8_t data[8];
     bool ack;
 };
-typedef consectiveFrame;
+typedef consectiveFrame consectiveFrame;
 
-struct
+struct flowControl
 {
     uint32_t id;
     uint8_t data[8];
     bool ack;
 };
-typedef flowControl;
+typedef flowControl flowControl;
+
+*/
+//------------------------------
+/*struct
+{
+    flowControl flowctr;
+    consectiveFrame consectivefrm;
+    firstFrame firstfrm;
+    singleFrame snglfrm;
+
+} typedef CanTpFrame;*/
+class CanManager; // Forward declaration of CanManager class
 
 class CanTp : public TransportProtocol
 {
 private:
 public:
-    CanTp();
-    ~CanTp();
+    /*flowControl flowctr;
+    consectiveFrame consectivefrm;
+    firstFrame firstfrm;
+    singleFrame snglfrm;*/
+
+    CanTp(uint32_t txId, uint32_t rxId);
+    void sendMessage(const std::string &message);
+    void sendSingleFrame(const std::string &message);
+    void sendMultiFrame(const std::string &message);
+    std::string receiveMessage(const std::vector<Can> &frames);
+    ~CanTp() = default; // Default destructor
+    void sendMessageP(const std::string &message, TransportProtocol &transportprotocol) override;
+    std::string receiveMessageP(TransportProtocol &transportprotocol, CanManager &canManager) override;
+    static const size_t MAX_SF_DATA = 8; // Maximum data length for Single Frame
+    static const size_t MAX_CF_DATA = 6; // Maximum data length for Consecutive Frame
+    static const size_t MAX_FC_DATA = 8; // Maximum data length for Flow Control
+    uint32_t txId_;
+    uint32_t rxId_;
 };
-
-CanTp::CanTp()
-{
-}
-
-CanTp::~CanTp()
-{
-}
 
 #endif

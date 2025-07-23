@@ -1,12 +1,23 @@
 
+#include "BusManager.hpp"
+#include <cstdint>
+
 #ifndef _CANBUS_HPP
 #define _CANBUS_HPP
 
-class CanBus
+struct
+{
+    uint8_t flag;
+    uint8_t flag2;
+    uint8_t flag3;
+
+} typedef CanFlag;
+
+class CanBus : public BusManager
 {
 public:
-    CanBus::CanBus() = default;  // Default constructor
-    CanBus::~CanBus() = default; // Default destructor
+    CanBus() = default;  // Default constructor
+    ~CanBus() = default; // Default destructor
 };
 
-#endif;
+#endif

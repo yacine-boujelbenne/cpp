@@ -1,7 +1,7 @@
 
 #ifndef _BUSMANAGER_HPP
 #define _BUSMANAGER_HPP
-
+#include <cstddef>
 #include <cstdint>
 
 class BusManager
@@ -14,13 +14,5 @@ public:
     BusManager();
     ~BusManager();
 };
-
-BusManager::BusManager()
-{
-}
-
-BusManager::~BusManager()
-{
-}
 
 #endif

@@ -7,16 +7,14 @@ class Sender : public Ecu
 private:
     /* data */
 public:
-    Sender();
+    Sender(std::string name, bool available);
     ~Sender();
+    void setEcuName(const std::string &name) override;
+    std::string getEcuName() const override;
+    void setAvailability(bool available) override;
+    bool isAvailable() const override;
+    uint32_t getValue() const override;
+    void setValue(int32_t value) override;
 };
-
-Sender::Sender() : Ecu("Receiver", "RX")
-{
-}
-
-Sender::~Sender()
-{
-}
 
 #endif

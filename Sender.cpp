@@ -3,7 +3,17 @@
 #include <String>
 #include <cstdint>
 #include <vector>
+#include "Sender.hpp"
 
+Sender::Sender(std::string name, bool available) : Ecu::Ecu(name, available)
+{
+
+    std::cout << "Sender constructor called with name: " << getEcuName() << std::endl;
+}
+
+Sender::~Sender()
+{
+}
 void sendEcuData(const Ecu &ecu)
 
 {

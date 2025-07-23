@@ -4,14 +4,16 @@
 #include "Can.hpp"
 #include <vector>
 #include <cstdint>
-
+#include "TransportProtocol.hpp" // if TransportProtocol is used
+#include "Can.hpp"               // if Can is used
+class TransportProtocol;         // Forward declaration of TransportProtocol class
 class CanManager
 {
 public:
-    virtual void sendFrame(uint32_t id, const std::vector<uint8_t> &data) = 0;
-    virtual void receiveFrame() = 0;
-
-    virtual ~CanManager() = default; // Always add virtual destructor for base classes
+    CanManager() = default;  // Default constructor
+    ~CanManager() = default; // Default destructor
+    virtual void sendFrame(Can canMessage) = 0;
+    virtual std::string receiveFrame(TransportProtocol &transportProtocol, CanManager &canManager) = 0;
 };
 
 #endif

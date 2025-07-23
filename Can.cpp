@@ -4,33 +4,50 @@
 #include "CanManager.hpp"
 #include <iostream>
 #include "Can.hpp"
+#include "TransportProtocol.hpp"
+#include "CanTp.hpp"
+#include <iomanip>
 
-Can::Can()
-{
-    CanFrame frame;
-    frame.canId = 0; // Initialize with default values
-    frame.dlc = 0;
-    frame.data.resize(8, 0); // Resize to 8 bytes with default value
-    frameQueue.push(frame);
+Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
+{ // Store the encoded data
+
+    if (data.size() > MAX_DATA_LENGTH)
+    {
+        data_.resize(MAX_DATA_LENGTH); // Truncate if too long
+        std::cerr << "Warning: Data truncated to " << MAX_DATA_LENGTH << " bytes" << std::endl;
+    }
 }
 
-void Can::sendFrame(uint32_t id, const std::vector<uint8_t> &data)
+void Can::sendFrame(Can canMessage)
 {
-    std::cout << "Sending CAN Frame with ID: " << std::hex << id << "\nData: ";
-    if (data.size() > 8)
+}
+
+std::string receiveFrame(TransportProtocol &transportProtocol, CanManager &canManager)
+{
+    std::string receivedData = transportProtocol.receiveMessageP(transportProtocol, canManager);
+    return receivedData;
+}
+
+uint32_t Can::getId() const
+{
+    return id_;
+}
+
+const std::vector<uint8_t> &Can::getData() const
+{
+    return data_;
+}
+void Can::print() const
+{
+    std::cout << "CAN Frame: ID = 0x" << std::hex << std::setw(3) << std::setfill('0') << id_
+              << ", Data = ";
+    for (uint8_t byte : data_)
     {
-        throw std::runtime_error("Data size exceeds maximum allowed for CAN frame");
-    }
-    for (auto byte : data)
-    {
-        std::cout << std::hex << static_cast<int>(byte) << " ";
+        std::cout << std::hex << std::setw(2) << std::setfill('0') << (int)byte << " ";
     }
     std::cout << std::dec << std::endl;
 }
-void Can::receiveFrame()
+std::vector<uint8_t> Can::encoder(const std::string &data)
 {
-    std::cout << "Receiving CAN Frame (simulation)\n"
-              << std::endl;
-    // Simulate receiving a frame
-    throw std::runtime_error("No frames available");
+    return std::vector<uint8_t>(data.begin(), data.end());
 }

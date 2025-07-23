@@ -7,13 +7,15 @@ class Receiver : public Ecu
 private:
     /* data */
 public:
-    Receiver();
+    Receiver(std::string name, bool available);
     ~Receiver();
+    void setEcuName(const std::string &name) override;
+    std::string getEcuName() const override;
+    void setAvailability(bool available) override;
+    bool isAvailable() const override;
+    uint32_t getValue() const override;
+    void setValue(int32_t value) override;
 };
-
-Receiver::Receiver() : Ecu("Receiver", "RX")
-{
-}
 
 Receiver::~Receiver()
 {
