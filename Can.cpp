@@ -1,4 +1,3 @@
-
 #include <stdexcept>
 #include <vector>
 #include "CanManager.hpp"
@@ -8,36 +7,31 @@
 #include "CanTp.hpp"
 #include <iomanip>
 
-Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
-{ // Store the encoded data
+Can::Can() : id_(0), data_() {}
 
-    if (data.size() > MAX_DATA_LENGTH)
+Can::Can(uint32_t id, const std::vector<uint8_t> &datat) : id_(id), data_(datat)
+{
+    if (data_.size() > MAX_DATA_LENGTH)
     {
-        data_.resize(MAX_DATA_LENGTH); // Truncate if too long
-        std::cerr << "Warning: Data truncated to " << MAX_DATA_LENGTH << " bytes" << std::endl;
+        throw std::runtime_error("Data size exceeds maximum CAN frame length");
     }
 }
-
-void Can::sendFrame(Can canMessage)
+std::string receiveFrame(TransportProtocol &tp, CanManager &cm)
 {
-}
-
-std::string receiveFrame(TransportProtocol &transportProtocol, CanManager &canManager)
-{
-    std::string receivedData = transportProtocol.receiveMessageP(transportProtocol, canManager);
+    std::string receivedData = tp.receiveMessageP(tp, cm);
     return receivedData;
 }
 
-uint32_t Can::getId() const
+Can::~Can()
 {
-    return id_;
+    std::cout << "CAN Frame with ID = 0x" << std::hex << std::setw(3) << std::setfill('0') << id_ << " destroyed." << std::dec << std::endl;
 }
 
 const std::vector<uint8_t> &Can::getData() const
 {
     return data_;
 }
-void Can::print() const
+void Can::print()
 {
     std::cout << "CAN Frame: ID = 0x" << std::hex << std::setw(3) << std::setfill('0') << id_
               << ", Data = ";
@@ -50,4 +44,23 @@ void Can::print() const
 std::vector<uint8_t> Can::encoder(const std::string &data)
 {
     return std::vector<uint8_t>(data.begin(), data.end());
+}
+
+void sendFrame(const std::vector<uint8_t> &data)
+{
+    if (data.size() > 7)
+    {
+        throw std::runtime_error("Data size exceeds maximum CAN frame length");
+    }
+
+    // Here you would typically send the frame to the CAN bus
+}
+
+const uint32_t Can::getId() const
+{
+    return id_;
+}
+const std::vector<uint8_t> &Can::getData() const
+{
+    return data_;
 }

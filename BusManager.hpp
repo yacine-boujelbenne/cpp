@@ -1,18 +1,25 @@
+#ifndef BUSMANAGER_HPP
+#define BUSMANAGER_HPP
 
-#ifndef _BUSMANAGER_HPP
-#define _BUSMANAGER_HPP
-#include <cstddef>
-#include <cstdint>
+#include <vector>
+#include <iostream>
 
+#include "Can.hpp"
 class BusManager
-
 {
-private:
 public:
-    void brodcastMessage(uint32_t id, const uint8_t *data, size_t length);
-    void acceptMessage(uint32_t id, uint8_t *data, size_t &length);
     BusManager();
     ~BusManager();
+    bool createVCAN();
+    bool init();
+    void send(const Can &frame);
+    Can receive();
+    void closeSocket();
+
+private:
+#ifdef __linux__
+    int socket_fd = -1; // Descripteur du socket CAN
+#endif
 };
 
-#endif
+#endif // BUSMANAGER_HPP

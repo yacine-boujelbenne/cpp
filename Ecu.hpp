@@ -1,6 +1,7 @@
 #ifndef _ECU_
 #define _ECU_
 #include "BusManager.hpp"
+#include <iostream>
 struct data
 {
     // Define the structure of data that will be used in the ECU
@@ -11,13 +12,13 @@ typedef data Data;
 
 class Ecu
 {
-private:
+protected:
     std::string ECUName;
     bool availability;
 
 public:
     Ecu(const std::string &name, bool available);
-    ~Ecu();
+    virtual ~Ecu() = default;
     virtual void setEcuName(const std::string &name) = 0;
     virtual std::string getEcuName() const = 0;
     virtual void setAvailability(bool available) = 0;

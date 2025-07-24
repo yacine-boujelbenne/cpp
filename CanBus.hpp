@@ -18,6 +18,7 @@ class CanBus : public BusManager
 public:
     CanBus() = default;  // Default constructor
     ~CanBus() = default; // Default destructor
+    void initializer();
 };
 
 #endif

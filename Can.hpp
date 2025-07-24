@@ -8,27 +8,22 @@
 #include <iostream>
 #include "TransportProtocol.hpp"
 
-/*struct
-{
-    uint32_t canId;           // 11-bit or 29-bit CAN ID
-    std::queue<uint8_t> data; // Up to 8 bytes for standard CAN
-    uint8_t dlc;              // Data Length Code
-};
-typedef CanFrame;*/
 class TransportProtocol; // Forward declaration of TransportProtocol class
+// Forward declaration of CanManager class
 class Can : public CanManager
-
 {
 public:
-    Can(uint32_t id, const std::vector<uint8_t> &datat);
-    const std::vector<uint8_t> &getData() const;
+    Can();
+    Can(uint32_t id, const std::vector<uint8_t> &data);
+    virtual ~Can();
 
-    ~Can() = default;
-    void sendFrame(Can canMessage) override;
-    std::string receiveFrame(TransportProtocol &transportProtocol, CanManager &canManager) override;
-    void print() const;
+    void sendFrame(const std::vector<uint8_t> &data) override;
+    std::string receiveFrame(TransportProtocol &tp, CanManager &cm) override;
+
     const std::vector<uint8_t> &getData() const;
-    uint32_t getId() const;
+    const uint32_t getId() const; // Make this const
+    void print();
+
     static std::vector<uint8_t> encoder(const std::string &data);
 
 private:

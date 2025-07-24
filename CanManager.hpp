@@ -1,19 +1,23 @@
 
 #ifndef _CANMANAGER_HPP
 #define _CANMANAGER_HPP
-#include "Can.hpp"
+#include <iostream>
 #include <vector>
 #include <cstdint>
-#include "TransportProtocol.hpp" // if TransportProtocol is used
-#include "Can.hpp"               // if Can is used
-class TransportProtocol;         // Forward declaration of TransportProtocol class
+// if TransportProtocol is used
+
+// if Can is used
+class TransportProtocol; // Forward declaration of TransportProtocol class
 class CanManager
 {
 public:
-    CanManager() = default;  // Default constructor
-    ~CanManager() = default; // Default destructor
-    virtual void sendFrame(Can canMessage) = 0;
-    virtual std::string receiveFrame(TransportProtocol &transportProtocol, CanManager &canManager) = 0;
+    CanManager() = default;
+    virtual ~CanManager() = default;
+    virtual void sendFrame(const std::vector<uint8_t> &data) = 0;
+    virtual std::string receiveFrame(TransportProtocol &tp, CanManager &cm) = 0;
 };
-
 #endif
+
+/*    Can frame(Can::getId(), data);
+    std::cout << "Sending CAN Frame:" << std::endl;
+    frame.print(); // Print the frame details*/

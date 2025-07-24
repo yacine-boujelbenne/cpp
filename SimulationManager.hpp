@@ -15,9 +15,11 @@ class SimulationManager
     // std::vector<std::unique_ptr<CanTpSession>> nodes;
 
 public:
+    SimulationManager() = default;
+    ~SimulationManager() = default;
     void addNode(uint32_t txId, uint32_t rxId);
     void runSimulation(Ecu &ecu);
-    void createNewEcu();
+    void createNewEcu(Ecu &ecu);
     void initializer();
     void showResults(const Ecu &ecu);
 };

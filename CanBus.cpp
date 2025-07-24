@@ -4,6 +4,6 @@
 #include <memory>
 #include <vector>
 
-void initializer()
+void CanBus::initializer()
 {
 }

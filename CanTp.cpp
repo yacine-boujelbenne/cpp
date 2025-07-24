@@ -6,7 +6,7 @@
 #include "Can.hpp"
 #include "TransportProtocol.hpp"
 
-void sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
+void TransportProtocol::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
 {
     CanTp cantp = dynamic_cast<CanTp &>(transportProtocol);
     cantp.sendMessage(message);
