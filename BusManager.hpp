@@ -4,7 +4,8 @@
 #include <vector>
 #include <iostream>
 
-#include "Can.hpp"
+class Can; // Forward declaration
+
 class BusManager
 {
 public:

@@ -107,8 +107,8 @@ void BusManager::send(const Can &trame)
     }
 
     struct can_frame frame{};
-    frame.can_id = trame.getFrameID(); // suppose que FrameCAN a getId()
-    frame.can_dlc = 8;                 // suppose que FrameCAN a getDLC()
+    frame.can_id = trame.getId();
+    frame.can_dlc = trame.getData().size();
     std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
 
     if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
@@ -128,7 +128,7 @@ Can BusManager::receive()
     if (socket_fd < 0)
     {
         std::cerr << "Socket CAN non initialisée pour réception\n";
-        return FrameCAN(); // FrameCAN vide
+        return Can(); // Can vide
     }
 
     struct can_frame canFrame{};
@@ -137,17 +137,17 @@ Can BusManager::receive()
     if (nbytes < 0)
     {
         perror("Erreur lecture CAN");
-        return FrameCAN();
+        return Can();
     }
 
     if (nbytes < sizeof(canFrame))
     {
         std::cerr << "Trame CAN incomplète reçue\n";
-        return FrameCAN();
+        return Can();
     }
 
-    return FrameCAN(canFrame.can_id,
-                    std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
+    return Can(canFrame.can_id,
+               std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
 #else
     std::cerr << "Réception CAN non supportée sur cette plateforme\n";
     return Can();
