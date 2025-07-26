@@ -9,7 +9,7 @@ class CanTp;
 const size_t CanTp::MAX_SF_DATA = 8; // Maximum data length for Single Frame
 const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Frame
 const size_t CanTp::MAX_FC_DATA = 8; // Maximum data length for Flow Control
-void TransportProtocol::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
+void CanTp::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
 {
     CanTp cantp = dynamic_cast<CanTp &>(transportProtocol);
     cantp.sendMessage(message);
@@ -158,4 +158,12 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
     }
 
     return message;
+}
+std::string CanTp::receiveMessageP(TransportProtocol &transportprotocol, CanManager &canManager)
+{
+    CanTp &cantp = dynamic_cast<CanTp &>(transportprotocol);
+    std::vector<Can> frames; // This should be filled with received CAN frames
+    // For now, we simulate receiving frames
+    std::string receivedMessage = cantp.receiveMessage(frames);
+    return receivedMessage;
 }

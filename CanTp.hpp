@@ -5,49 +5,7 @@
 #include <vector>
 #include <string>
 #include "Can.hpp"
-/*
-struct singleFrame
-{
-    uint32_t id;
-    uint8_t data[8];
-    bool ack;
-};
-typedef singleFrame singleFrame;
 
-struct firstFrame
-{
-    uint32_t id;
-    uint8_t data[8];
-    bool ack;
-};
-typedef firstFrame firstFrame;
-
-struct consectiveFrame
-{
-    uint32_t id;
-    uint8_t data[8];
-    bool ack;
-};
-typedef consectiveFrame consectiveFrame;
-
-struct flowControl
-{
-    uint32_t id;
-    uint8_t data[8];
-    bool ack;
-};
-typedef flowControl flowControl;
-
-*/
-//------------------------------
-/*struct
-{
-    flowControl flowctr;
-    consectiveFrame consectivefrm;
-    firstFrame firstfrm;
-    singleFrame snglfrm;
-
-} typedef CanTpFrame;*/
 class CanManager; // Forward declaration of CanManager class
 
 class CanTp : public TransportProtocol
