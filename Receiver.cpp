@@ -48,3 +48,8 @@ uint32_t Receiver::getValue() const
     // Placeholder implementation, should be overridden in derived classes
     return 0;
 }
+void Receiver::setValue(int32_t value)
+{
+    // Placeholder implementation, should be overridden in derived classes
+    std::cout << "Setting value in Receiver class is not implemented." << std::endl;
+}
