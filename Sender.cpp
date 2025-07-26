@@ -3,12 +3,18 @@
 #include <vector>
 #include "Sender.hpp"
 #include <cstdint>
+#include "CanManager.hpp"
 
 class Ecu; // Forward declaration of CanManager class
 
-Sender::Sender(const std::string &name, bool available)
-: Ecu(name, available) // Remove redundant Ecu::
+Sender::Sender(const std::string &name, bool available) : Ecu(name, available) // Assuming CanManager is a member of Sender class
 {
+
+    availability = available; // Initialize availability
+    ECUName = name;
+
+    // Initialize CanManager reference
+
     std::cout << "Sender constructor called with name: " << getEcuName() << std::endl;
 }
 
@@ -16,14 +22,14 @@ Sender::~Sender()
 {
     std::cout << "Sender destructor called" << std::endl;
 }
-void Sender::sendEcuData(const Ecu &ecu)
-
+void Sender::sendEcuData(std::string &msg, TransportProtocol &tp, CanManager &can_manager)
 {
-    std::cout << "Sending data for ECU: " << ecu.getEcuName() << std::endl;
+    std::cout << "Sending data from Sender ECU: " << getEcuName() << std::endl;
     // Simulate sending data
-    if (ecu.isAvailable())
+    if (isAvailable())
     {
-        std::cout << "ECU is available. Sending value: " << static_cast<int>(ecu.getValue()) << std::endl;
+        std::cout << "ECU is available. Sent data: " << msg << std::endl;
+        can_manager.sendFrame(Ecu::encoder(msg), tp); // Assuming CanManager has an encoder method
     }
     else
     {
@@ -32,6 +38,8 @@ void Sender::sendEcuData(const Ecu &ecu)
 }
 void Sender::setEcuName(const std::string &name)
 {
+    ECUName = name;
+    std::cout << "Sender ECU name set to: " << ECUName << std::endl;
 }
 std::string Sender::getEcuName() const
 {

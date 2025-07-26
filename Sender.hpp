@@ -4,15 +4,15 @@
 #include <string> // Add this for std::string
 #include "Ecu.hpp"
 #include <cstdint>
+#include "TransportProtocol.hpp"
+#include "CanManager.hpp"
 
 class Sender : public Ecu
 {
-private:
-    /* data */
 public:
     Sender(const std::string &name, bool available); // Add const and reference
     ~Sender();
-    void sendEcuData(const Ecu &ecu);
+    void sendEcuData(std::string &msg, TransportProtocol &tp, CanManager &can_manager);
     void setEcuName(const std::string &name) override;
     std::string getEcuName() const override;
     void setAvailability(bool available) override;

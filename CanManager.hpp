@@ -13,11 +13,7 @@ class CanManager
 public:
     CanManager() = default;
     virtual ~CanManager() = default;
-    virtual void sendFrame(const std::vector<uint8_t> &data) = 0;
-    virtual std::string receiveFrame(TransportProtocol &tp, CanManager &cm) = 0;
+    virtual void sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp) = 0;
+    virtual std::string receiveFrame(TransportProtocol &tp, CanManager *cm) = 0;
 };
 #endif
-
-/*    Can frame(Can::getId(), data);
-    std::cout << "Sending CAN Frame:" << std::endl;
-    frame.print(); // Print the frame details*/

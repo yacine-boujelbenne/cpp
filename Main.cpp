@@ -19,6 +19,7 @@
 #include "CanTp.hpp"
 #include "Sender.hpp"
 #include "Receiver.hpp"
+#include "Ecu.hpp"
 
 void demonstrateBasicCanCommunication()
 {
@@ -81,10 +82,10 @@ void demonstrateEcuCommunication()
 
     // Simulation de l'envoi de données
     std::cout << "=== ECU Sender ===" << std::endl;
-    senderEcu.sendEcuData(senderEcu);
+    senderEcu.sendEcuData();
 
     std::cout << "\n=== ECU Receiver ===" << std::endl;
-    receiverEcu.receiveEcuData(senderEcu);
+    receiverEcu.receiveEcuData();
 }
 
 void runInteractiveDemo()
@@ -206,7 +207,7 @@ void testCanFrameCreation()
     // Test de l'encodeur de chaîne
     std::cout << "\nTest de l'encodeur de chaîne:" << std::endl;
     std::string testString = "TEST";
-    std::vector<uint8_t> encodedData = Can::encoder(testString);
+    std::vector<uint8_t> encodedData = Ecu::encoder(testString);
     Can stringFrame(0x555, encodedData);
     stringFrame.print();
 }

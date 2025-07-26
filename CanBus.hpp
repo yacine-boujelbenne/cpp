@@ -17,8 +17,8 @@ struct
 class CanBus : public BusManager
 {
 public:
-    CanBus() = default;  // Default constructor
-    ~CanBus() = default; // Default destructor
+    CanBus();  // Default constructor
+    ~CanBus(); // Default destructor
 
     bool createVCAN();
     bool init() override;

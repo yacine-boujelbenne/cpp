@@ -1,21 +1,30 @@
-
 #include <cstdint>
 #include "CanTp.hpp"
 #include <iostream>
 #include <iomanip>
 #include "Can.hpp"
 #include "TransportProtocol.hpp"
-class CanTp;
-const size_t CanTp::MAX_SF_DATA = 8; // Maximum data length for Single Frame
+#include <typeinfo>
+#include "Receiver.hpp"
+#include "Sender.hpp"
+#include "CanBus.hpp"
+
+const size_t CanTp::MAX_SF_DATA = 7; // Maximum data length for Single Frame
 const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Frame
-const size_t CanTp::MAX_FC_DATA = 8; // Maximum data length for Flow Control
+
+// Constructor updated to include BusManager reference
+CanTp::CanTp(uint32_t txId, uint32_t rxId)
+    : txId_(txId), rxId_(rxId), busManager_(*new CanBus()) {}
+
+// Constructor with BusManager reference
+CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager)
+    : txId_(txId), rxId_(rxId), busManager_(busManager) {}
+
 void CanTp::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
 {
     CanTp cantp = dynamic_cast<CanTp &>(transportProtocol);
     cantp.sendMessage(message);
 }
-
-CanTp::CanTp(uint32_t txId, uint32_t rxId) : txId_(txId), rxId_(rxId) {}
 
 void CanTp::sendMessage(const std::string &message)
 {
@@ -25,18 +34,20 @@ void CanTp::sendMessage(const std::string &message)
     }
     else
     {
+        sendingMessage = message;
+        sendingOffset = 0;
+        sendingSequence = 1;
+        sendingMultiFrame = true;
         sendMultiFrame(message);
     }
 }
 
 void CanTp::sendSingleFrame(const std::string &message)
 {
-    // Single Frame: [PCI (1 byte) | Data]
-    // PCI: 0x00 | Length (4 bits)
     std::vector<uint8_t> data;
     uint8_t pci = (0x00 << 4) | (message.size() & 0x0F); // Single Frame PCI
     data.push_back(pci);
-    data.insert(data.end(), message.begin(), message.end()); // Append string bytes
+    data.insert(data.end(), message.begin(), message.end());
     Can frame(txId_, data);
     if (txId_ <= 0x7FF)
     {
@@ -46,46 +57,101 @@ void CanTp::sendSingleFrame(const std::string &message)
     {
         frame.setFrameType(true); // Extended frame
     }
-
-    std::cout << "Sending Single Frame:" << std::endl;
-    frame.print();
+    busManager_.send(frame); // Use BusManager instead of print
 }
 
 void CanTp::sendMultiFrame(const std::string &message)
 {
-    // First Frame: [PCI (2 bytes) | Data]
-    // PCI: 0x10 | Length (12 bits)
+    // Send First Frame
     std::vector<uint8_t> data;
     uint16_t length = message.size();
     uint8_t pci1 = (0x10) | ((length >> 8) & 0x0F); // First Frame PCI, high length
     uint8_t pci2 = length & 0xFF;                   // Low length
     data.push_back(pci1);
     data.push_back(pci2);
-    size_t dataBytes = std::min<size_t>(6, message.size()); // Up to 6 bytes in FF
+    size_t dataBytes = std::min<size_t>(6, message.size());
     data.insert(data.end(), message.begin(), message.begin() + dataBytes);
     Can frame(txId_, data);
-    std::cout << "Sending First Frame:" << std::endl;
-    frame.print(); // Houni Bch yod5l el BusManager
+    busManager_.send(frame); // Send via BusManager
+    sendingOffset = dataBytes;
+    // Wait for Flow Control frame
+    CanManager *fcFrame1 = busManager_.receive(); // Replace with actual FC ID
 
-    // Consecutive Frames: [PCI (1 byte) | Data]
-    // PCI: 0x20 | Sequence Number (4 bits)
-    size_t remaining = message.size() - dataBytes;
-    size_t offset = dataBytes;
-    uint8_t sequence = 1;
-    while (remaining > 0)
+    auto *fcFrame = dynamic_cast<Can *>(fcFrame1);
+    while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
     {
-        data.clear();
-        uint8_t pci = (0x20) | (sequence & 0x0F); // Consecutive Frame PCI
+        fcFrame1 = busManager_.receive();
+    }
+
+    // Process Flow Control
+    const auto &fcData = fcFrame->getData();
+    if (fcData.size() >= 3)
+    {
+        uint8_t flowStatus = fcData[1];
+        uint8_t blockSize = fcData[2];
+        uint8_t separationTime = fcData[3]; // Not used in this simple sim
+
+        if (flowStatus == 0)
+        { // ContinueToSend
+            sendNextBlock(blockSize);
+        }
+        else if (flowStatus == 2)
+        { // Overflow
+            sendingMultiFrame = false;
+            std::cerr << "Transmission aborted due to overflow" << std::endl;
+        }
+        // Wait status (1) would loop back to receive another FC frame if implemented
+    }
+}
+
+void CanTp::sendNextBlock(uint8_t blockSize)
+{
+    size_t remaining = sendingMessage.size() - sendingOffset;
+    for (uint8_t i = 0; i < blockSize && remaining > 0; ++i)
+    {
+        std::vector<uint8_t> data;
+        uint8_t pci = (0x20) | (sendingSequence & 0x0F); // Consecutive Frame PCI
         data.push_back(pci);
         size_t bytesToSend = std::min<size_t>(MAX_CF_DATA, remaining);
-        data.insert(data.end(), message.begin() + offset, message.begin() + offset + bytesToSend);
+        data.insert(data.end(), sendingMessage.begin() + sendingOffset,
+                    sendingMessage.begin() + sendingOffset + bytesToSend);
         Can cf(txId_, data);
-        std::cout << "Sending Consecutive Frame (SN=" << (int)sequence << "):" << std::endl;
-        cf.print(); // houni bch yod5l el BusManager
+        busManager_.send(cf); // Send via BusManager
+        sendingOffset += bytesToSend;
+        sendingSequence = (sendingSequence + 1) & 0x0F;
         remaining -= bytesToSend;
-        offset += bytesToSend;
-        sequence = (sequence + 1) & 0x0F; // Wrap sequence number
     }
+    if (sendingOffset >= sendingMessage.size())
+    {
+        sendingMultiFrame = false;
+    }
+    else
+    {
+        // Wait for next Flow Control frame
+        CanManager *fcFrame1 = busManager_.receive();
+        auto *fcFrame = dynamic_cast<Can *>(fcFrame1);
+        while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
+        {
+            fcFrame1 = busManager_.receive();
+        }
+        const auto &fcData = fcFrame->getData();
+        if (fcData.size() >= 3 && fcData[1] == 0)
+        { // ContinueToSend
+            sendNextBlock(fcData[2]);
+        }
+    }
+}
+
+void CanTp::sendFlowControl(uint8_t flowStatus, uint8_t blockSize, uint8_t separationTime)
+{
+    std::vector<uint8_t> data;
+    uint8_t pci = 0x30; // Flow Control PCI
+    data.push_back(pci);
+    data.push_back(flowStatus);
+    data.push_back(blockSize);
+    data.push_back(separationTime);
+    Can frame(rxId_, data);  // Send on rxId_ as it's from receiver to sender
+    busManager_.send(frame); // Send via BusManager
 }
 
 std::string CanTp::receiveMessage(const std::vector<Can> &frames)
@@ -100,6 +166,7 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
     bool isFirstFrame = false;
     size_t expectedLength = 0;
     uint8_t expectedSequence = 1;
+    size_t receivedFrames = 0;
 
     for (const auto &frame : frames)
     {
@@ -119,8 +186,8 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
         uint8_t pci = data[0];
         uint8_t frameType = (pci >> 4) & 0x0F;
 
-        if (frameType == 0x00)
-        { // Single Frame
+        if (frameType == 0x00) // Single Frame
+        {
             uint8_t length = pci & 0x0F;
             if (data.size() < length + 1)
             {
@@ -130,8 +197,8 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
             message.assign(data.begin() + 1, data.begin() + 1 + length);
             return message;
         }
-        else if (frameType == 0x10 && !isFirstFrame)
-        { // First Frame
+        else if (frameType == 0x10 && !isFirstFrame) // First Frame
+        {
             if (data.size() < 2)
             {
                 std::cerr << "Invalid First Frame" << std::endl;
@@ -140,9 +207,10 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
             expectedLength = ((data[0] & 0x0F) << 8) | data[1];
             message.assign(data.begin() + 2, data.end());
             isFirstFrame = true;
+            sendFlowControl(0, 5, 0); // Send FC: ContinueToSend, blockSize=5
         }
-        else if (frameType == 0x20 && isFirstFrame)
-        { // Consecutive Frame
+        else if (frameType == 0x20 && isFirstFrame) // Consecutive Frame
+        {
             uint8_t sequence = pci & 0x0F;
             if (sequence != expectedSequence)
             {
@@ -152,10 +220,11 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
             }
             message.insert(message.end(), data.begin() + 1, data.end());
             expectedSequence = (expectedSequence + 1) & 0x0F;
-        }
-        else
-        {
-            return "";
+            receivedFrames++;
+            if (receivedFrames % 5 == 0 && message.size() < expectedLength)
+            {
+                sendFlowControl(0, 5, 0); // Send FC after each block
+            }
         }
     }
 
@@ -166,12 +235,4 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
     }
 
     return message;
-}
-std::string CanTp::receiveMessageP(TransportProtocol &transportprotocol, CanManager &canManager)
-{
-    CanTp &cantp = dynamic_cast<CanTp &>(transportprotocol);
-    std::vector<Can> frames; // This should be filled with received CAN frames
-    // For now, we simulate receiving frames
-    std::string receivedMessage = cantp.receiveMessage(frames);
-    return receivedMessage;
 }

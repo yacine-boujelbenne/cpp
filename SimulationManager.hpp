@@ -4,14 +4,15 @@
 #include "CanBus.hpp"
 #include "Ecu.hpp"
 #include <time.h>
-#include <cstdint>
+#include "CanManager.hpp"
+#include "BusManager.hpp"
+#include "TransportProtocol.hpp"
 
 #ifndef _SIMULATION_MANAGER_HPP
 #define _SIMULATION_MANAGER_HPP
 
 class SimulationManager
 {
-    CanBus bus;
     long silenceTime = time(nullptr);
     // std::vector<std::unique_ptr<CanTpSession>> nodes;
 
@@ -20,9 +21,15 @@ public:
     ~SimulationManager() = default;
     void addNode(uint32_t txId, uint32_t rxId);
     void runSimulation(Ecu &ecu);
-    void createNewEcu(Ecu &ecu);
+    void createNewEcu(Ecu *ecu, CanManager &canManager);
     void initializer();
     void showResults(const Ecu &ecu);
+
+protected:
+    CanManager &cm;        // Reference to CanManager for sending/receiving data
+    TransportProtocol &tp; // Reference to TransportProtocol for CAN communication
+    Ecu &ecu1;             // Reference to Ecu for simulation
+    BusManager &bus;       // Reference to BusManager for CAN bus management
 };
 
 #endif // _SIMULATION_MANAGER_HPP

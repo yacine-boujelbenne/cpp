@@ -6,11 +6,12 @@
 #include "TransportProtocol.hpp"
 #include "CanTp.hpp"
 #include <iomanip>
+#include "Ecu.hpp"
 #include <cstdint>
 
 Can::Can() : id_(0), data_() {}
 
-Can::Can(uint32_t id, const std::vector<uint8_t> &datat) : id_(id), data_(datat)
+Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
 {
     if (data_.size() > MAX_DATA_LENGTH)
     {
@@ -18,9 +19,9 @@ Can::Can(uint32_t id, const std::vector<uint8_t> &datat) : id_(id), data_(datat)
     }
 }
 
-std::string receiveFrame(TransportProtocol &tp, CanManager &cm)
+std::string receiveFrame(TransportProtocol &tp, CanManager *cm)
 {
-    std::string receivedData = tp.receiveMessageP(tp, cm);
+    std::string receivedData = tp.receiveMessageP(cm);
     return receivedData;
 }
 
@@ -45,26 +46,22 @@ void Can::print()
     std::cout << std::dec << std::endl;
 }
 
-std::vector<uint8_t> Can::encoder(const std::string &data)
-{
-    return std::vector<uint8_t>(data.begin(), data.end());
-}
-
-void Can::sendFrame(const std::vector<uint8_t> &data)
+void Can::sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp)
 {
     if (data.size() > 8)
     {
-        throw std::runtime_error("Data size exceeds maximum CAN frame length");
-    }
-    // Implementation will be handled by BusManager
-}
 
+        throw std::runtime_error("Data size exceeds maximum CAN frame length");
+        tp.sendMessageP(Ecu::decoder(data), tp); // Use TransportProtocol to send the frame
+        // Implementation will be handled by BusManager
+    }
+}
 const uint32_t Can::getId() const
 {
     return id_;
 }
 
-std::string Can::receiveFrame(TransportProtocol &tp, CanManager &cm)
+std::string Can::receiveFrame(TransportProtocol &tp, CanManager *cm)
 {
-    return tp.receiveMessageP(tp, cm);
+    return tp.receiveMessageP(cm);
 }

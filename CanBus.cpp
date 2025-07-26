@@ -110,9 +110,9 @@ void CanBus::send(const CanManager &frame)
     }
 
     struct can_frame frame{};
-    frame.can_id = trame.getId();
-    frame.can_dlc = trame.getData().size();
-    std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
+    frame.can_id = frame.getId();
+    frame.can_dlc = frame.getData().size();
+    std::memcpy(frame.data, frame.getData().data(), frame.can_dlc);
 
     if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
     {
@@ -127,8 +127,8 @@ void CanBus::send(const CanManager &frame)
 
 CanManager *CanBus::receive()
 {
-    Can *frame = new Can(receiveFrame()); // Heap allocation
-    return frame;                         // Upcast to base pointer
+    CanManager *frame = new Can(receiveFrame()); // Heap allocation
+    return frame;                                // Upcast to base pointer
 }
 Can CanBus::receiveFrame()
 {
@@ -154,8 +154,7 @@ Can CanBus::receiveFrame()
         return Can();
     }
 
-    return Can(canFrame.can_id,
-               std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
+    return Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
 #else
     std::cerr << "Réception CAN non supportée sur cette plateforme\n";
     return Can();

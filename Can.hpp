@@ -18,8 +18,8 @@ public:
     Can(uint32_t id, const std::vector<uint8_t> &data);
     virtual ~Can();
 
-    void sendFrame(const std::vector<uint8_t> &data) override;
-    std::string receiveFrame(TransportProtocol &tp, CanManager &cm) override;
+    void sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp) override;
+    std::string receiveFrame(TransportProtocol &tp, CanManager *cm) override;
 
     const std::vector<uint8_t> &getData() const;
     const uint32_t getId() const; // Make this const
@@ -28,8 +28,6 @@ public:
     {
         this->extandedFrame = extendedF;
     } // Set the type of frame (standard or extended)
-
-    static std::vector<uint8_t> encoder(const std::string &data);
 
 private:
     bool extandedFrame = false;              // Check if extended frame is used

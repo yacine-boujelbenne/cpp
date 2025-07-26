@@ -16,6 +16,7 @@ class Ecu
 protected:
     std::string ECUName;
     bool availability;
+    // Reference to CanManager for sending/receiving data
 
 public:
     Ecu(const std::string &name, bool available);
@@ -26,6 +27,14 @@ public:
     virtual bool isAvailable() const = 0;
     virtual uint32_t getValue() const = 0;
     virtual void setValue(int32_t value) = 0;
+    static std::vector<uint8_t> encoder(const std::string &data)
+    {
+        return std::vector<uint8_t>(data.begin(), data.end());
+    }
+    static std::string decoder(const std::vector<uint8_t> &data)
+    {
+        return std::string(data.begin(), data.end());
+    }
 };
 
 #endif // _ECU_

@@ -3,6 +3,7 @@
 #include "Ecu.hpp"
 #include <iostream>
 #include <cstdint>
+#include "CanManager.hpp"
 
 class Receiver : public Ecu
 {
@@ -11,7 +12,7 @@ private:
 public:
     Receiver(std::string name, bool available);
     ~Receiver();
-    void receiveEcuData(const Ecu &ecu);
+    std::string receiveEcuData(Ecu *ecu, TransportProtocol *tp, CanManager &can_manager);
     // Override Ecu methods
     void setEcuName(const std::string &name) override;
     std::string getEcuName() const override;
