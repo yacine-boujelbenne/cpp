@@ -5,7 +5,10 @@
 #include <iomanip>
 #include "Can.hpp"
 #include "TransportProtocol.hpp"
-
+class CanTp;
+const size_t CanTp::MAX_SF_DATA = 8; // Maximum data length for Single Frame
+const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Frame
+const size_t CanTp::MAX_FC_DATA = 8; // Maximum data length for Flow Control
 void TransportProtocol::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
 {
     CanTp cantp = dynamic_cast<CanTp &>(transportProtocol);
