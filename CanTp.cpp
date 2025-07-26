@@ -38,6 +38,14 @@ void CanTp::sendSingleFrame(const std::string &message)
     data.push_back(pci);
     data.insert(data.end(), message.begin(), message.end()); // Append string bytes
     Can frame(txId_, data);
+    if (txId_ <= 0x7FF)
+    {
+        frame.setFrameType(false); // Standard frame
+    }
+    else
+    {
+        frame.setFrameType(true); // Extended frame
+    }
 
     std::cout << "Sending Single Frame:" << std::endl;
     frame.print();

@@ -1,6 +1,7 @@
 
 #include "BusManager.hpp"
 #include <cstdint>
+#include "CanManager.hpp"
 
 #ifndef _CANBUS_HPP
 #define _CANBUS_HPP
@@ -18,7 +19,18 @@ class CanBus : public BusManager
 public:
     CanBus() = default;  // Default constructor
     ~CanBus() = default; // Default destructor
-    void initializer();
+
+    bool createVCAN();
+    bool init() override;
+    void closeSocket();
+    void send(const CanManager &frame) override;
+    CanManager *receive() override;
+    Can receiveFrame();
+
+private:
+#ifdef __linux__
+    int socket_fd = -1; // Descripteur du socket CAN
+#endif
 };
 
 #endif

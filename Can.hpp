@@ -24,10 +24,15 @@ public:
     const std::vector<uint8_t> &getData() const;
     const uint32_t getId() const; // Make this const
     void print();
+    void setFrameType(bool extendedF) // True for extnded False for standart
+    {
+        this->extandedFrame = extendedF;
+    } // Set the type of frame (standard or extended)
 
     static std::vector<uint8_t> encoder(const std::string &data);
 
 private:
+    bool extandedFrame = false;              // Check if extended frame is used
     uint32_t id_;                            // CAN ID (11-bit or 29-bit)
     std::vector<uint8_t> data_;              // Data payload (0–8 bytes for standard CAN)
     static const size_t MAX_DATA_LENGTH = 8; // Standard CAN payload limit
