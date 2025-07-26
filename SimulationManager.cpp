@@ -6,6 +6,8 @@
 #include "Sender.hpp"   // Add these includes
 #include <vector>
 #include <memory>
+#include <cstdint>
+
 void SimulationManager::initializer()
 {
     std::cout << "Initializing Simulation Manager...\n"

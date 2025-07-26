@@ -6,6 +6,7 @@
 #include "TransportProtocol.hpp"
 #include "CanTp.hpp"
 #include <iomanip>
+#include <cstdint>
 
 Can::Can() : id_(0), data_() {}
 

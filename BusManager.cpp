@@ -1,6 +1,7 @@
 #include "BusManager.hpp"
 #include "Can.hpp"
 #include <iostream>
+#include <cstdint>
 
 #ifdef __linux__
 #include <cstdlib>

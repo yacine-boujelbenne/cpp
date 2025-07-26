@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Ecu.hpp"
+#include <cstdint>
 
 Ecu::Ecu(const std::string &name, bool available)
     : ECUName(name), availability(available)

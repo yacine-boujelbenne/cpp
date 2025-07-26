@@ -2,6 +2,7 @@
 #define _ECU_
 #include "BusManager.hpp"
 #include <iostream>
+#include <cstdint>
 struct data
 {
     // Define the structure of data that will be used in the ECU

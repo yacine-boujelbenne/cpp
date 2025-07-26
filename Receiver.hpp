@@ -2,6 +2,7 @@
 #define _RECEIVER_
 #include "Ecu.hpp"
 #include <iostream>
+#include <cstdint>
 
 class Receiver : public Ecu
 {

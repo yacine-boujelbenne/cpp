@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <thread>
+#include <cstdint>
 
 #ifdef _WIN32
 #include <windows.h>

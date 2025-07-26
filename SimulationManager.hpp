@@ -4,6 +4,7 @@
 #include "CanBus.hpp"
 #include "Ecu.hpp"
 #include <time.h>
+#include <cstdint>
 
 #ifndef _SIMULATION_MANAGER_HPP
 #define _SIMULATION_MANAGER_HPP

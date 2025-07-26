@@ -3,6 +3,7 @@
 
 #include <string> // Add this for std::string
 #include "Ecu.hpp"
+#include <cstdint>
 
 class Sender : public Ecu
 {

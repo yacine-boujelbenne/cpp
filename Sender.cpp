@@ -2,10 +2,12 @@
 
 #include <vector>
 #include "Sender.hpp"
+#include <cstdint>
+
 class Ecu; // Forward declaration of CanManager class
 
 Sender::Sender(const std::string &name, bool available)
-    : Ecu(name, available) // Remove redundant Ecu::
+: Ecu(name, available) // Remove redundant Ecu::
 {
     std::cout << "Sender constructor called with name: " << getEcuName() << std::endl;
 }
@@ -21,7 +23,7 @@ void Sender::sendEcuData(const Ecu &ecu)
     // Simulate sending data
     if (ecu.isAvailable())
     {
-        std::cout << "ECU is available. Sending value: " << ecu.getValue() << std::endl;
+        std::cout << "ECU is available. Sending value: " << static_cast<int>(ecu.getValue()) << std::endl;
     }
     else
     {
@@ -46,7 +48,7 @@ bool Sender::isAvailable() const
 uint32_t Sender::getValue() const
 {
     // Placeholder implementation, should be overridden in derived classes
-    return 0;
+    return 0x00000000;
 }
 void Sender::setValue(int32_t value)
 {

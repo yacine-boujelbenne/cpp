@@ -2,6 +2,7 @@
 #include "Ecu.hpp"
 #include <string>
 #include "Receiver.hpp"
+#include <cstdint>
 
 Receiver::Receiver(std::string name, bool available)
     : Ecu(name, available)
@@ -20,7 +21,7 @@ void Receiver::receiveEcuData(const Ecu &ecu)
     // Simulate receiving data
     if (ecu.isAvailable())
     {
-        std::cout << "ECU is available. Received value: " << ecu.getValue() << std::endl;
+        std::cout << "ECU is available. Received value: " << static_cast<int>(ecu.getValue()) << std::endl;
     }
     else
     {
@@ -46,5 +47,5 @@ bool Receiver::isAvailable() const
 uint32_t Receiver::getValue() const
 {
     // Placeholder implementation, should be overridden in derived classes
-    return 0;
+    return 0x00000000;
 }

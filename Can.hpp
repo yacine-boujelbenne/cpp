@@ -1,6 +1,7 @@
 #ifndef _CAN_
 #define _CAN_
 
+#include <cstdint>
 #include <queue>
 #include <stdexcept>
 #include <vector>
