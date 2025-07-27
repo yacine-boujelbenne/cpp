@@ -109,7 +109,7 @@ void CanBus::send(const Can &trame)
         return;
     }
     struct can_frame frame{};
-    uint32_t raw_id = trame.getID(); // Récupération de l'ID CAN
+    uint32_t raw_id = trame.getId(); // Récupération de l'ID CAN
     frame.can_id = trame.isExtendedFrame() ? (raw_id | CAN_EFF_FLAG) : raw_id;
     frame.can_dlc = trame.getData().size();
     std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
