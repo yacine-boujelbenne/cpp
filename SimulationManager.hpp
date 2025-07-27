@@ -25,7 +25,6 @@ public:
     void initializer();
     void showResults(const Ecu &ecu);
 
-protected:
     CanManager &cm;        // Reference to CanManager for sending/receiving data
     TransportProtocol &tp; // Reference to TransportProtocol for CAN communication
     Ecu &ecu1;             // Reference to Ecu for simulation
