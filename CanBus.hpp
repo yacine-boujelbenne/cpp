@@ -2,6 +2,7 @@
 #include "BusManager.hpp"
 #include <cstdint>
 #include "CanManager.hpp"
+#include "Can.hpp"
 
 #ifndef _CANBUS_HPP
 #define _CANBUS_HPP
@@ -23,8 +24,11 @@ public:
     bool createVCAN();
     bool init() override;
     void closeSocket();
-    void send(const CanManager &trame) override;
-    CanManager *receive() override;
+    void send(const Can &trame) override;
+    CanManager *receive() override
+    {
+        return new Can(receiveFrame()); // Upcast to base pointer
+    };
     Can receiveFrame();
 
 private:

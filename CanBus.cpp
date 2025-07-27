@@ -99,7 +99,7 @@ bool CanBus::init()
 #endif
 }
 
-void CanBus::send(const CanManager &trame)
+void CanBus::send(const Can &trame)
 {
 
 #ifdef __linux__
@@ -109,8 +109,8 @@ void CanBus::send(const CanManager &trame)
         return;
     }
     struct can_frame frame{};
-    uint32_t raw_id = trame.getFrameID().getID(); // Récupération de l'ID CAN
-    frame.can_id = trame.getFrameID().isExtended() ? (raw_id | CAN_EFF_FLAG) : raw_id;
+    uint32_t raw_id = trame.getID(); // Récupération de l'ID CAN
+    frame.can_id = trame.isExtendedFrame() ? (raw_id | CAN_EFF_FLAG) : raw_id;
     frame.can_dlc = trame.getData().size();
     std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
     if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
@@ -123,12 +123,12 @@ void CanBus::send(const CanManager &trame)
     }
 #endif
 }
-
 CanManager *CanBus::receive()
 {
-    CanManager *frame = new Can(receiveFrame()); // Heap allocation
-    return frame;                                // Upcast to base pointer
+    Can receivedFrame = receiveFrame();
+    return new Can(receivedFrame); // Upcast to base pointer
 }
+
 Can CanBus::receiveFrame()
 {
 #ifdef __linux__

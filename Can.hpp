@@ -28,6 +28,10 @@ public:
     {
         this->extandedFrame = extendedF;
     } // Set the type of frame (standard or extended)
+    bool isExtendedFrame() const
+    {
+        return extandedFrame;
+    } // Check if the frame is extended
 
 private:
     bool extandedFrame = false;              // Check if extended frame is used

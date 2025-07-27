@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
+#include "CanManager.hpp" // <-- REQUIRED for CanManager
 // <-- REQUIRED for std::string
 // <-- REQUIRED if you use CanManager&
 
