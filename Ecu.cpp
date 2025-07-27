@@ -3,15 +3,6 @@
 #include "Ecu.hpp"
 #include <cstdint>
 
-Ecu::Ecu(const std::string &name, bool available)
-    : ECUName(name), availability(available)
-{
-    // Initialize CanManager reference
-    availability = available; // Initialize availability
-    ECUName = name;
-    std::cout << "Ecu constructor called with name: " << ECUName << std::endl;
-}
-
 std::string Ecu::getEcuName() const
 {
     return ECUName;

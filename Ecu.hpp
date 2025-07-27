@@ -19,7 +19,14 @@ protected:
     // Reference to CanManager for sending/receiving data
 
 public:
-    Ecu(const std::string &name, bool available);
+    Ecu(const std::string &name, bool available)
+        : ECUName(name), availability(available)
+    {
+        // Initialize CanManager reference
+        availability = available; // Initialize availability
+        ECUName = name;
+        std::cout << "Ecu constructor called with name: " << ECUName << std::endl;
+    }
     virtual ~Ecu() = default;
     virtual void setEcuName(const std::string &name) = 0;
     virtual std::string getEcuName() const = 0;
