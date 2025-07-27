@@ -23,7 +23,7 @@ public:
     bool createVCAN();
     bool init() override;
     void closeSocket();
-    void send(const CanManager &frame) override;
+    void send(const CanManager &trame) override;
     CanManager *receive() override;
     Can receiveFrame();
 

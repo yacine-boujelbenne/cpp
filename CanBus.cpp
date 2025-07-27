@@ -99,7 +99,7 @@ bool CanBus::init()
 #endif
 }
 
-void CanBus::send(const CanManager &frame)
+void CanBus::send(const CanManager &trame)
 {
 
 #ifdef __linux__
@@ -110,9 +110,9 @@ void CanBus::send(const CanManager &frame)
     }
 
     struct can_frame frame{};
-    frame.can_id = frame.getId();
-    frame.can_dlc = frame.getData().size();
-    std::memcpy(frame.data, frame.getData().data(), frame.can_dlc);
+    frame.can_id = trame.getId();
+    frame.can_dlc = trame.getData().size();
+    std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
 
     if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
     {

@@ -65,7 +65,7 @@ void SimulationManager::runSimulation(Ecu &ecu)
         std::cout << "Running simulation for Receiver ECU: \n"
                   << ecu.getEcuName() << std::endl;
         Receiver &exEcu = dynamic_cast<Receiver &>(ecu);
-        std::string receivedMessage = exEcu.receiveEcuData(&exEcu, &this->tp, cm); // Pass CanManager reference
+        std::string receivedMessage = exEcu.receiveEcuData(&exEcu, &this->tp, this->cm); // Pass CanManager reference
         if (!receivedMessage.empty())
         {
             std::cout << "Received message: \n"
@@ -85,7 +85,7 @@ void SimulationManager::runSimulation(Ecu &ecu)
         std::string message;
         std::cout << "Enter message to send: \n";
         std::cin >> message;
-        exEcu.sendEcuData(message, this->tp, cm); // Pass CanManager reference
+        exEcu.sendEcuData(message, this->tp, this->cm); // Pass CanManager reference
         std::cout << "start sending message: \n"
                   << message << std::endl;
     }

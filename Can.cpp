@@ -21,7 +21,7 @@ Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
 
 std::string receiveFrame(TransportProtocol &tp, CanManager *cm)
 {
-    std::string receivedData = tp.receiveMessageP(cm);
+    std::string receivedData = tp.receiveMessageP(tp, cm);
     return receivedData;
 }
 
@@ -52,7 +52,7 @@ void Can::sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp)
     {
 
         throw std::runtime_error("Data size exceeds maximum CAN frame length");
-        tp.sendMessageP(Ecu::decoder(data), tp); // Use TransportProtocol to send the frame
+        tp.sendMessageP(Ecu::decoder(data)); // Use TransportProtocol to send the frame
         // Implementation will be handled by BusManager
     }
 }
@@ -63,5 +63,5 @@ const uint32_t Can::getId() const
 
 std::string Can::receiveFrame(TransportProtocol &tp, CanManager *cm)
 {
-    return tp.receiveMessageP(cm);
+    return tp.receiveMessageP(tp, cm);
 }

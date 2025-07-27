@@ -8,7 +8,7 @@
 #include "Receiver.hpp"
 #include "Sender.hpp"
 #include "CanBus.hpp"
-
+#include "Ecu.hpp"
 const size_t CanTp::MAX_SF_DATA = 7; // Maximum data length for Single Frame
 const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Frame
 
@@ -20,10 +20,9 @@ CanTp::CanTp(uint32_t txId, uint32_t rxId)
 CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager)
     : txId_(txId), rxId_(rxId), busManager_(busManager) {}
 
-void CanTp::sendMessageP(const std::string &message, TransportProtocol &transportProtocol)
+void CanTp::sendMessageP(const std::string &message)
 {
-    CanTp cantp = dynamic_cast<CanTp &>(transportProtocol);
-    cantp.sendMessage(message);
+    this->sendMessage(message);
 }
 
 void CanTp::sendMessage(const std::string &message)
@@ -235,4 +234,15 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
     }
 
     return message;
+}
+std::string CanTp::receiveMessageP(TransportProtocol &tp, CanManager *cm)
+{
+    std::vector<Can> frames;
+    std::string msg = cm->receiveFrame(tp, cm);
+    while (msg != "")
+
+    {
+        Ecu::encoder(msg);
+    }
+    return receiveMessage(frames);
 }

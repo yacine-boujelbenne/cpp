@@ -15,9 +15,9 @@ public:
     CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager);
     CanTp(uint32_t txId, uint32_t rxId);
     void sendMessage(const std::string &message);
-    void sendMessageP(const std::string &message, TransportProtocol &transportProtocol) override;
+    void sendMessageP(const std::string &message) override;
     std::string receiveMessage(const std::vector<Can> &frames);
-    std::string receiveMessageP(CanManager *cm) override;
+    std::string receiveMessageP(TransportProtocol &tp, CanManager *cm) override;
     void setbusManager(BusManager &busManager) { busManager_ = busManager; }
 
     ~CanTp() = default; // Default destructor

@@ -15,8 +15,8 @@ class TransportProtocol
 public:
     TransportProtocol() = default;
     virtual ~TransportProtocol() = default;
-    virtual void sendMessageP(const std::string &message, TransportProtocol &transportprotocol) = 0;
-    virtual std::string receiveMessageP(CanManager *cm) = 0;
+    virtual void sendMessageP(const std::string &message) = 0;
+    virtual std::string receiveMessageP(TransportProtocol &tp, CanManager *cm) = 0;
     uint32_t txId__;
     uint32_t rxId__;
 };

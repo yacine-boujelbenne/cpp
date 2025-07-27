@@ -10,8 +10,8 @@ class Can; // Forward declaration
 class BusManager
 {
 public:
-    BusManager();
-    ~BusManager();
+    BusManager() = default;
+    ~BusManager() = default;
 
     virtual bool init() = 0;
     virtual void send(const CanManager &frame);
