@@ -3,8 +3,10 @@
 
 #include <vector>
 #include <iostream>
+#include <cstdio>
 
-class Can; // Forward declaration
+class CanManager; // Forward declaration
+class Can;
 
 class BusManager
 {
@@ -14,6 +16,17 @@ public:
 
     virtual bool init() = 0;
     virtual void send(const Can &frame);
-    virtual CanManager *receive();
+    virtual void receive();
+    void setcanMan(CanManager *cm)
+    {
+        this->canmanager = cm;
+    }
+    CanManager *getcanMan()
+    {
+        return this->canmanager;
+    }
+
+private:
+    CanManager *canmanager;
 };
 #endif // BUSMANAGER_HPP

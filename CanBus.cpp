@@ -123,11 +123,6 @@ void CanBus::send(const Can &trame)
     }
 #endif
 }
-CanManager *CanBus::receive()
-{
-    Can receivedFrame = receiveFrame();
-    return new Can(receivedFrame); // Upcast to base pointer
-}
 
 Can CanBus::receiveFrame()
 {
@@ -170,4 +165,9 @@ void CanBus::closeSocket()
         std::cout << "Socket CAN fermée\n";
     }
 #endif
+}
+void CanBus::receive()
+{
+
+    BusManager::setcanMan(new Can(receiveFrame())); // Upcast to base pointer
 }

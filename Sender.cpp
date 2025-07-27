@@ -5,7 +5,7 @@
 #include <cstdint>
 #include "CanManager.hpp"
 
-class Ecu; // Forward declaration of CanManager class
+#include "Ecu.hpp"
 
 Sender::Sender(const std::string &name, bool available) : Ecu(name, available) // Assuming CanManager is a member of Sender class
 {

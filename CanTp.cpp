@@ -74,12 +74,14 @@ void CanTp::sendMultiFrame(const std::string &message)
     busManager_.send(frame); // Send via BusManager
     sendingOffset = dataBytes;
     // Wait for Flow Control frame
-    CanManager *fcFrame1 = busManager_.receive(); // Replace with actual FC ID
+    busManager_.receive();
+    CanManager *fcFrame1 = busManager_.getcanMan(); // Replace with actual FC ID
 
     auto fcFrame = dynamic_cast<Can *>(fcFrame1);
     while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
     {
-        fcFrame1 = busManager_.receive();
+        busManager_.receive();
+        fcFrame1 = busManager_.getcanMan();
     }
 
     // Process Flow Control
@@ -127,11 +129,14 @@ void CanTp::sendNextBlock(uint8_t blockSize)
     else
     {
         // Wait for next Flow Control frame
-        CanManager *fcFrame1 = busManager_.receive();
+        busManager_.receive();
+        CanManager *fcFrame1 = busManager_.getcanMan();
         auto fcFrame = dynamic_cast<Can *>(fcFrame1);
         while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
         {
-            fcFrame1 = busManager_.receive();
+            busManager_.receive();
+
+            fcFrame1 = busManager_.getcanMan();
         }
         const auto &fcData = fcFrame->getData();
         if (fcData.size() >= 3 && fcData[1] == 0)

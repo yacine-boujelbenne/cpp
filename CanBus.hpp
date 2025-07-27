@@ -1,7 +1,7 @@
 
-#include "BusManager.hpp"
+
 #include <cstdint>
-#include "CanManager.hpp"
+
 #include "Can.hpp"
 
 #ifndef _CANBUS_HPP
@@ -15,6 +15,9 @@ struct
 
 } typedef CanFlag;
 
+class BusManager;
+class CanManager;
+
 class CanBus : public BusManager
 {
 public:
@@ -25,10 +28,8 @@ public:
     bool init() override;
     void closeSocket();
     void send(const Can &trame) override;
-    CanManager *receive() override
-    {
-        return new Can(receiveFrame()); // Upcast to base pointer
-    };
+    void receive() override;
+
     Can receiveFrame();
 
 private:
