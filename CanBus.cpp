@@ -105,22 +105,21 @@ void CanBus::send(const CanManager &trame)
 #ifdef __linux__
     if (socket_fd < 0)
     {
-        std::cerr << "Socket CAN non initialisée\n";
+        std::cerr << "CAN socket not initialized !\n";
         return;
     }
-
     struct can_frame frame{};
-    frame.can_id = trame.getId();
+    uint32_t raw_id = trame.getFrameID().getID(); // Récupération de l'ID CAN
+    frame.can_id = trame.getFrameID().isExtended() ? (raw_id | CAN_EFF_FLAG) : raw_id;
     frame.can_dlc = trame.getData().size();
     std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
-
     if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
     {
-        perror("Erreur d'envoi CAN");
+        perror("CAN sending error !");
     }
     else
     {
-        std::cout << "Trame CAN envoyée (ID: 0x" << std::hex << frame.can_id << std::dec << ", " << (int)frame.can_dlc << " octets)\n";
+        std::cout << "CAN frame sent (ID: 0x" << std::hex << frame.can_id << std::dec << ", " << (int)frame.can_dlc << " octets)\n";
     }
 #endif
 }
