@@ -121,12 +121,12 @@ int main()
     std::cin >> repi;
     if (repi = 1)
     {
+        std::cout << "CanBus 3";
+
         simManager->bus = *new CanBus();
     }
 
-    simManager->bus.init();
-
-        // Create and simulate an ECU
+    // Create and simulate an ECU
     Ecu *ecu = nullptr;
 
     ecu = simManager->createNewEcu(ecu, simManager->cm); // Use simManager's CanManager

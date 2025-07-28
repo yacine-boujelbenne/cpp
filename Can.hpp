@@ -16,7 +16,7 @@ class Can : public CanManager
 public:
     Can();
     Can(uint32_t id, const std::vector<uint8_t> &data);
-    virtual ~Can();
+    virtual ~Can() = default;
 
     void sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp) override;
     std::string receiveFrame(TransportProtocol &tp, CanManager *cm) override;

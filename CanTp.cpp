@@ -14,7 +14,7 @@ const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Fram
 
 // Constructor updated to include BusManager reference
 CanTp::CanTp(uint32_t txId, uint32_t rxId)
-    : txId_(txId), rxId_(rxId), busManager_(*new CanBus()) {}
+    : txId_(txId), rxId_(rxId), busManager_(*new CanBus()) {} // for the future updates the canTp can be dynamic and accept the declaration without setting the bus.
 
 // Constructor with BusManager reference
 CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager)

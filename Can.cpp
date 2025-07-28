@@ -26,11 +26,6 @@ std::string receiveFrame(TransportProtocol &tp, CanManager *cm)
     return receivedData;
 }
 
-Can::~Can()
-{
-    std::cout << "CAN Frame with ID = 0x" << std::hex << std::setw(3) << std::setfill('0') << id_ << " destroyed." << std::dec << std::endl;
-}
-
 const std::vector<uint8_t> &Can::getData() const
 {
     return data_;
