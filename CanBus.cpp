@@ -130,7 +130,7 @@ CanManager *CanBus::receiveFrame()
     if (socket_fd < 0)
     {
         std::cerr << "Socket CAN non initialisée pour réception\n";
-        return Can(); // Can vide
+        return nullptr; // Can vide
     }
 
     struct can_frame canFrame{};
@@ -139,16 +139,17 @@ CanManager *CanBus::receiveFrame()
     if (nbytes < 0)
     {
         perror("Erreur lecture CAN");
-        return Can();
+        return nullptr;
     }
 
     if (nbytes < sizeof(canFrame))
     {
         std::cerr << "Trame CAN incomplète reçue\n";
-        return Can();
+        return nullptr;
     }
-
-    return Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
+    Can frame = Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
+    CanManager *fRame = &frame;
+    return fRame;
 #else
     std::cerr << "Réception CAN non supportée sur cette plateforme\n";
     return nullptr;
