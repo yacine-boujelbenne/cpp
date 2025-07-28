@@ -101,7 +101,6 @@ bool CanBus::init()
 
 void CanBus::send(const Can &trame)
 {
-    this->init();
 
 #ifdef __linux__
     if (socket_fd < 0)

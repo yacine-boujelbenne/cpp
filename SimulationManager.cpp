@@ -95,7 +95,7 @@ void SimulationManager::runSimulation(Ecu &ecu)
             CanTp ct(0x123, 0x234, this->bus);
             this->tp = ct;
         }
-
+        this->bus.init();
         exEcu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
         std::cout << "Message sent: " << message << std::endl;
     }
