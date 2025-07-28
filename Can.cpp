@@ -16,7 +16,8 @@ Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
     std::cout << "hey";
     if (data_.size() > MAX_DATA_LENGTH)
     {
-        throw std::runtime_error("Data size exceeds maximum CAN frame length");
+        std::cout << "Data size exceeds maximum CAN frame length";
+        std::cout << "Calling for CanTp....";
     }
 }
 

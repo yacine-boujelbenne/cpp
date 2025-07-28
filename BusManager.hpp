@@ -28,6 +28,6 @@ public:
     }
 
 private:
-    CanManager *canmanager;
+    CanManager *canmanager = nullptr;
 };
 #endif // BUSMANAGER_HPP

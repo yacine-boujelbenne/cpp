@@ -92,10 +92,20 @@ void SimulationManager::runSimulation(Ecu &ecu)
         std::cin >> rep;
         if (rep == 1)
         {
-            CanTp ct(0x123, 0x234, this->bus);
-            this->tp = ct;
+
+            std::cout << "Select  The available Bus protocol : \n -1- CanBus" << std::endl;
+            int repi;
+            std::cin >> repi;
+            // bs.init();
+            if (repi = 1)
+            {
+                CanBus bs = *new CanBus();
+                std::cout << "Message sent:11111\n ";
+                CanTp ct(0x123, 0x234, bs);
+                this->tp = ct;
+            }
         }
-        this->bus.init();
+
         exEcu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
         std::cout << "Message sent: " << message << std::endl;
     }
@@ -115,16 +125,8 @@ void SimulationManager::showResults(const Ecu &ecu)
 // Main function added
 int main()
 {
-    SimulationManager *simManager;
-    std::cout << "Select The available Bus protocol : \n -1- CanBus" << std::endl;
-    int repi;
-    std::cin >> repi;
-    if (repi = 1)
-    {
-        std::cout << "CanBus 3";
 
-        simManager->bus = *new CanBus();
-    }
+    SimulationManager *simManager;
 
     // Create and simulate an ECU
     Ecu *ecu = nullptr;
@@ -134,8 +136,8 @@ int main()
     simManager->runSimulation(*ecu);
 
     // Clean up resources
-    delete &simManager->cm;  // Delete Can instance (careful with pointer management)
-    delete &simManager->bus; // Delete CanBus instance
+    delete &simManager->cm; // Delete Can instance (careful with pointer management)
 
+    simManager->bus.closeSocket();
     return 0;
 }
