@@ -11,26 +11,12 @@
 #include "CanTp.hpp"
 #include "CanManager.hpp" // Added for CanManager
 #include "BusManager.hpp"
+#include "Can.hpp"
 
 void SimulationManager::initializer()
 {
     std::cout << "Initializing Simulation Manager...\n"
               << std::endl;
-    Ecu *ecu1 = nullptr;
-    this->createNewEcu(ecu1, cm); // Pass cm by reference
-    if (ecu1)
-    {
-        std::cout << ecu1->getEcuName() << " created successfully.\n"
-                  << std::endl;
-    }
-    else
-    {
-        std::cerr << "Failed to create ECU.\n"
-                  << std::endl;
-    }
-    cm = *new Can();               // Create a CanManager instance (assuming Can is meant here)
-    bus = *new CanBus();           // Create a CanBus instance
-    tp = CanTp(0x123, 0x456, bus); // Pass CanBus as BusManager reference
     // Set the bus manager for the transport protocol (handled via constructor)
 }
 
@@ -70,9 +56,10 @@ Ecu *SimulationManager::createNewEcu(Ecu *ecu, CanManager &canManager)
 
 void SimulationManager::runSimulation(Ecu &ecu)
 {
+
     if (typeid(ecu) == typeid(Receiver))
     {
-        std::cout << "Running simulation for Receiver ECU: " << ecu.getEcuName() << std::endl;
+        std::cout << "\nRunning simulation for Receiver ECU: " << ecu.getEcuName() << std::endl;
         Receiver &exEcu = dynamic_cast<Receiver &>(ecu);
         std::string receivedMessage = exEcu.receiveEcuData(&exEcu, &tp, this->cm); // Pass references
         if (!receivedMessage.empty())
@@ -86,12 +73,30 @@ void SimulationManager::runSimulation(Ecu &ecu)
     }
     else if (typeid(ecu) == typeid(Sender))
     {
-        std::cout << "Running simulation for Sender ECU: " << ecu.getEcuName() << std::endl;
+        std::cout << "\nRunning simulation for Sender ECU: " << ecu.getEcuName() << std::endl;
         Sender &exEcu = dynamic_cast<Sender &>(ecu);
         std::string message;
         std::cout << "Enter message to send: \n";
         std::cin >> message;
-        exEcu.sendEcuData(message, tp, cm); // Pass by value or reference as needed
+
+        std::cout << "Select The available CanManager protocol : \n -1- Can" << std::endl;
+        int rep;
+        std::cin >> rep;
+        if (rep == 1)
+        {
+            Can cm(0x1234, Ecu::encoder(message));
+            this->cm = cm;
+        }
+        std::cout << "Select The available Transport protocol : \n -1- CanTp" << std::endl;
+        rep = 0;
+        std::cin >> rep;
+        if (rep == 1)
+        {
+            CanTp ct(0x123, 0x234, this->bus);
+            this->tp = ct;
+        }
+
+        exEcu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
         std::cout << "Message sent: " << message << std::endl;
     }
     else
@@ -110,27 +115,23 @@ void SimulationManager::showResults(const Ecu &ecu)
 // Main function added
 int main()
 {
-
     SimulationManager *simManager;
+    std::cout << "Select The available Bus protocol : \n -1- CanBus" << std::endl;
+    int repi;
+    std::cin >> repi;
+    if (repi = 1)
+    {
+        simManager->bus = *new CanBus();
+    }
 
-    // Create and simulate an ECU
+    simManager->bus.init();
+
+        // Create and simulate an ECU
     Ecu *ecu = nullptr;
-    simManager->initializer();
 
     ecu = simManager->createNewEcu(ecu, simManager->cm); // Use simManager's CanManager
     std::cout << ecu->getEcuName();
     simManager->runSimulation(*ecu);
-    if (ecu)
-    {
-        simManager->runSimulation(*ecu); // Run simulation with the created ECU
-        simManager->showResults(*ecu);   // Show results
-        delete ecu;                      // Clean up dynamically allocated ECU
-    }
-    else
-    {
-        std::cerr << "No ECU created to simulate.\n"
-                  << std::endl;
-    }
 
     // Clean up resources
     delete &simManager->cm;  // Delete Can instance (careful with pointer management)

@@ -7,6 +7,7 @@
 #include "CanManager.hpp"
 #include "BusManager.hpp"
 #include "TransportProtocol.hpp"
+#include "CanTp.hpp"
 
 #ifndef _SIMULATION_MANAGER_HPP
 #define _SIMULATION_MANAGER_HPP

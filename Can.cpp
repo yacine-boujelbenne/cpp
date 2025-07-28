@@ -13,6 +13,7 @@ Can::Can() : id_(0), data_() {}
 
 Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
 {
+    std::cout << "hey";
     if (data_.size() > MAX_DATA_LENGTH)
     {
         throw std::runtime_error("Data size exceeds maximum CAN frame length");
@@ -48,6 +49,7 @@ void Can::print()
 
 void Can::sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp)
 {
+    std::cout << "The can start sending";
     if (data.size() > 8)
     {
 

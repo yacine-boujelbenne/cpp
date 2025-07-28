@@ -22,6 +22,7 @@ CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager)
 
 void CanTp::sendMessageP(const std::string &message)
 {
+    std::cout << "now the cantp start sending the data";
     this->sendMessage(message);
 }
 

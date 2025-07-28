@@ -4,12 +4,12 @@
 #include <iostream>
 #include <vector>
 #include <cstdint>
-#include "CanManager.hpp" // <-- REQUIRED for CanManager
 // <-- REQUIRED for std::string
 // <-- REQUIRED if you use CanManager&
 
-class CanBus; // Forward declaration of Can class
-class Ecu;    // Forward declaration of Ecu class
+class CanBus;     // Forward declaration of Can class
+class Ecu;        // Forward declaration of Ecu class
+class CanManager; // Forward declaration of CanManager class
 
 class TransportProtocol
 {

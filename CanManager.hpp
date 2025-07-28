@@ -15,5 +15,7 @@ public:
     virtual ~CanManager() = default;
     virtual void sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp) = 0;
     virtual std::string receiveFrame(TransportProtocol &tp, CanManager *cm) = 0;
+    virtual void setData(std::vector<uint8_t> datal) = 0;
+    virtual void setId(uint32_t id) = 0;
 };
 #endif

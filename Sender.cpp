@@ -30,6 +30,8 @@ void Sender::sendEcuData(std::string &msg, TransportProtocol &tp, CanManager &ca
     {
         std::cout << "ECU is available. Sent data: " << msg << std::endl;
         can_manager.sendFrame(Ecu::encoder(msg), tp); // Assuming CanManager has an encoder method
+
+        std::cout << "Ecu sender has sent the data to the CanManager\n";
     }
     else
     {

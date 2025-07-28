@@ -32,6 +32,14 @@ public:
     {
         return extandedFrame;
     } // Check if the frame is extended
+    void setId(uint32_t id) override
+    {
+        this->id_ = id;
+    }
+    void setData(std::vector<uint8_t> datal) override
+    {
+        this->data_ = datal;
+    }
 
 private:
     bool extandedFrame = false;              // Check if extended frame is used
