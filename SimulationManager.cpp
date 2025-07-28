@@ -34,7 +34,7 @@ void SimulationManager::initializer()
     // Set the bus manager for the transport protocol (handled via constructor)
 }
 
-void SimulationManager::createNewEcu(Ecu *ecu, CanManager &canManager)
+Ecu *SimulationManager::createNewEcu(Ecu *ecu, CanManager &canManager)
 {
     std::cout << "Creating a new ECU...\n"
               << std::endl;
@@ -65,6 +65,7 @@ void SimulationManager::createNewEcu(Ecu *ecu, CanManager &canManager)
                   << std::endl;
         ecu = nullptr;
     }
+    return ecu;
 }
 
 void SimulationManager::runSimulation(Ecu &ecu)
@@ -114,7 +115,11 @@ int main()
 
     // Create and simulate an ECU
     Ecu *ecu = nullptr;
-    simManager->createNewEcu(ecu, simManager->cm); // Use simManager's CanManager
+    simManager->initializer();
+
+    ecu = simManager->createNewEcu(ecu, simManager->cm); // Use simManager's CanManager
+    std::cout << ecu->getEcuName();
+    simManager->runSimulation(*ecu);
     if (ecu)
     {
         simManager->runSimulation(*ecu); // Run simulation with the created ECU

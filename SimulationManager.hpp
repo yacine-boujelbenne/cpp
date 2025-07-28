@@ -21,7 +21,7 @@ public:
     ~SimulationManager() = default;
     void addNode(uint32_t txId, uint32_t rxId);
     void runSimulation(Ecu &ecu);
-    void createNewEcu(Ecu *ecu, CanManager &canManager);
+    Ecu *createNewEcu(Ecu *ecu, CanManager &canManager);
     void initializer();
     void showResults(const Ecu &ecu);
 
