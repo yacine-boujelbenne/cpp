@@ -19,7 +19,6 @@ public:
     std::string receiveMessage(const std::vector<Can> &frames);
     std::string receiveMessageP(TransportProtocol &tp, CanManager *cm) override;
     void setbusManager(BusManager &busManager) { busManager_ = busManager; }
-
     ~CanTp() = default; // Default destructor
 private:
     uint32_t txId_;

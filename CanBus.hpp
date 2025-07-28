@@ -22,6 +22,11 @@ public:
     void receive() override;
 
     CanManager *receiveFrame();
+
+private:
+#ifdef __linux__
+    int socket_fd = -1; // Descripteur du socket CAN
+#endif
 };
 
 #endif
