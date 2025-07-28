@@ -124,7 +124,7 @@ void CanBus::send(const Can &trame)
 #endif
 }
 
-Can CanBus::receiveFrame()
+CanManager *CanBus::receiveFrame()
 {
 #ifdef __linux__
     if (socket_fd < 0)
@@ -151,7 +151,7 @@ Can CanBus::receiveFrame()
     return Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
 #else
     std::cerr << "Réception CAN non supportée sur cette plateforme\n";
-    return Can();
+    return nullptr;
 #endif
 }
 
@@ -168,6 +168,5 @@ void CanBus::closeSocket()
 }
 void CanBus::receive()
 {
-
-    BusManager::setcanMan(new Can(receiveFrame())); // Upcast to base pointer
+    BusManager::setcanMan(receiveFrame()); // Upcast to base pointer
 }

@@ -12,11 +12,12 @@ class BusManager
 {
 public:
     BusManager() = default;
-    ~BusManager() = default;
-
+    virtual ~BusManager() = default;
+    virtual bool createVCAN();
     virtual bool init() = 0;
     virtual void send(const Can &frame);
     virtual void receive();
+    virtual void closeSocket();
     void setcanMan(CanManager *cm)
     {
         this->canmanager = cm;

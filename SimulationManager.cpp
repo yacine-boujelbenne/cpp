@@ -10,6 +10,7 @@
 #include <typeinfo>
 #include "CanTp.hpp"
 #include "CanManager.hpp" // Added for CanManager
+#include "BusManager.hpp"
 
 void SimulationManager::initializer()
 {
