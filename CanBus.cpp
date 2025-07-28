@@ -130,7 +130,7 @@ CanManager *CanBus::receiveFrame()
     if (socket_fd < 0)
     {
         std::cerr << "Socket CAN non initialisée pour réception\n";
-        return nullptr; // Can vide
+        return nullptr; // Return nullptr if socket is invalid
     }
 
     struct can_frame canFrame{};
@@ -147,9 +147,9 @@ CanManager *CanBus::receiveFrame()
         std::cerr << "Trame CAN incomplète reçue\n";
         return nullptr;
     }
-    Can frame = Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
-    CanManager *fRame = &frame;
-    return fRame;
+    // Dynamically allocate Can object
+    Can *frame = new Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
+    return frame; // Return pointer to dynamically allocated object
 #else
     std::cerr << "Réception CAN non supportée sur cette plateforme\n";
     return nullptr;
