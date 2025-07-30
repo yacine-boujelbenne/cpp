@@ -12,18 +12,18 @@ class TransportProtocol;
 class CanTp : public TransportProtocol
 {
 public:
-    CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager);
-    CanTp(uint32_t txId, uint32_t rxId);
+    CanTp(uint32_t txId, uint32_t rxId, BusManager *busManager);
+    CanTp(uint32_t txId, uint32_t rxId); // This constructor will need to handle busManager_ initialization carefully
     void sendMessage(const std::string &message);
     void sendMessageP(const std::string &message) override;
     std::string receiveMessage(const std::vector<Can> &frames);
     std::string receiveMessageP(TransportProtocol &tp, CanManager *cm) override;
-    void setbusManager(BusManager &busManager) { busManager_ = busManager; }
+    void setbusManager(BusManager *busManager) { busManager_ = busManager; }
     ~CanTp() = default; // Default destructor
 private:
     uint32_t txId_;
     uint32_t rxId_;
-    BusManager &busManager_;
+    BusManager *busManager_ = nullptr;
 
     static const size_t MAX_SF_DATA;
     static const size_t MAX_CF_DATA;
@@ -41,3 +41,4 @@ private:
 };
 
 #endif // CAN_TP_HPP
+

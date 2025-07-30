@@ -25,6 +25,7 @@ public:
     Ecu *createNewEcu(Ecu *ecu, CanManager &canManager);
     void initializer();
     void showResults(const Ecu &ecu);
+    int main();
 
     CanManager &cm;        // Reference to CanManager for sending/receiving data
     TransportProtocol &tp; // Reference to TransportProtocol for CAN communication
