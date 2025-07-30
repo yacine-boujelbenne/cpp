@@ -4,6 +4,7 @@
 #include <iostream>
 #include "CanTp.hpp"
 #include "Ecu.hpp"
+#include "Sender.hpp"
 
 Ecu *SimulationManager::createNewEcu(Ecu *ecu, CanManager &canManager)
 {
@@ -31,8 +32,9 @@ void SimulationManager::runSimulation(Ecu &exEcu)
             return;
         }
     }
+    Sender ecuu(exEcu.getEcuName(), exEcu.isAvailable());
 
-    exEcu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
+    ecuu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
     std::cout << "Message sent: " << message << std::endl;
 }
 
