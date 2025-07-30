@@ -37,10 +37,11 @@ void SimulationManager::runSimulation(Ecu &exEcu)
     ecuu.sendEcuData(message, this->tp, this->cm); // Pass by value or reference as needed
     std::cout << "Message sent: " << message << std::endl;
 }
-
+/*
 int main()
 {
     // This main function should ideally be in Main.cpp, not SimulationManager.cpp
     // For now, it's here to allow compilation of SimulationManager.cpp
     return 0;
 }
+*/

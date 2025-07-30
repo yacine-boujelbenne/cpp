@@ -54,11 +54,13 @@ void demonstrateCanTpCommunication()
               << std::endl;
 
     CanBus canBus;
-    if (!canBus.createVCAN()) {
+    if (!canBus.createVCAN())
+    {
         std::cerr << "Échec de la création de vcan0. La démonstration CAN-TP ne peut pas continuer." << std::endl;
         return;
     }
-    if (!canBus.init()) {
+    if (!canBus.init())
+    {
         std::cerr << "Échec de l'initialisation du socket CAN. La démonstration CAN-TP ne peut pas continuer." << std::endl;
         return;
     }
@@ -86,6 +88,21 @@ void demonstrateEcuCommunication()
     std::cout << "\n=== Démonstration Communication ECU ===\n"
               << std::endl;
 
+    CanBus canBus;
+    if (!canBus.createVCAN())
+    {
+        std::cerr << "Échec de la création de vcan0. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+    if (!canBus.init())
+    {
+        std::cerr << "Échec de l'initialisation du socket CAN. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+
+    CanTp canTp(0x700, 0x708, &canBus); // TX ID: 0x700, RX ID: 0x708
+    Can can(0x1, Ecu::encoder("HI I4M SENDER"));
+    Can canr;
     // Création des ECUs
     Sender senderEcu("Engine_ECU", true);
     Receiver receiverEcu("Dashboard_ECU", true);
@@ -95,10 +112,11 @@ void demonstrateEcuCommunication()
 
     // Simulation de l\"envoi de données
     std::cout << "=== ECU Sender ===" << std::endl;
-    // senderEcu.sendEcuData(); // Commented out due to missing arguments
+    std::string msg = "hey bouha";
+    senderEcu.sendEcuData(msg, canTp, can);
 
     std::cout << "\n=== ECU Receiver ===" << std::endl;
-    // receiverEcu.receiveEcuData(); // Commented out due to missing arguments
+    receiverEcu.receiveEcuData(&receiverEcu, &canTp, can);
 }
 
 void runInteractiveDemo()
@@ -161,11 +179,13 @@ void runInteractiveDemo()
             std::getline(std::cin, message);
 
             CanBus canBus;
-            if (!canBus.createVCAN()) {
+            if (!canBus.createVCAN())
+            {
                 std::cerr << "Échec de la création de vcan0. L'envoi CAN-TP ne peut pas continuer." << std::endl;
                 break;
             }
-            if (!canBus.init()) {
+            if (!canBus.init())
+            {
                 std::cerr << "Échec de l'initialisation du socket CAN. L'envoi CAN-TP ne peut pas continuer." << std::endl;
                 break;
             }
@@ -315,4 +335,3 @@ int main()
 
     return 0;
 }
-
