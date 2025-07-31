@@ -14,16 +14,15 @@ const size_t CanTp::MAX_CF_DATA = 6; // Maximum data length for Consecutive Fram
 
 // Constructor updated to include BusManager reference
 CanTp::CanTp(uint32_t txId, uint32_t rxId)
-    : txId_(txId), rxId_(rxId), busManager_(*new CanBus())
+    : txId_(txId), rxId_(rxId), busManager_(nullptr)
 {
-    busManager_.init();
+
 } // for the future updates the canTp can be dynamic and accept the declaration without setting the bus.
 
 // Constructor with BusManager reference
-CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager &busManager)
+CanTp::CanTp(uint32_t txId, uint32_t rxId, BusManager *busManager)
     : txId_(txId), rxId_(rxId), busManager_(busManager)
 {
-    busManager_.init();
 }
 
 void CanTp::sendMessageP(const std::string &message)
@@ -34,6 +33,10 @@ void CanTp::sendMessageP(const std::string &message)
 
 void CanTp::sendMessage(const std::string &message)
 {
+    if (busManager_ == nullptr) {
+        std::cerr << "BusManager not set for CanTp. Cannot send message." << std::endl;
+        return;
+    }
     if (message.size() <= MAX_SF_DATA)
     {
         sendSingleFrame(message);
@@ -63,7 +66,7 @@ void CanTp::sendSingleFrame(const std::string &message)
     {
         frame.setFrameType(true); // Extended frame
     }
-    busManager_.send(frame); // Use BusManager instead of print
+    busManager_->send(frame); // Use BusManager instead of print
 }
 
 void CanTp::sendMultiFrame(const std::string &message)
@@ -78,17 +81,28 @@ void CanTp::sendMultiFrame(const std::string &message)
     size_t dataBytes = std::min<size_t>(6, message.size());
     data.insert(data.end(), message.begin(), message.begin() + dataBytes);
     Can frame(txId_, data);
-    busManager_.send(frame); // Send via BusManager
+    busManager_->send(frame); // Send via BusManager
     sendingOffset = dataBytes;
+
+    // If in simulation mode, skip waiting for FC frame and directly send next block
+    CanBus* canBusPtr = dynamic_cast<CanBus*>(busManager_);
+    if (canBusPtr && canBusPtr->isSimulationMode()) {
+        std::cout << "Simulating Flow Control in sendMultiFrame (simulation mode)." << std::endl;
+        sendNextBlock(5); // Simulate block size 5
+        return;
+    }
+
     // Wait for Flow Control frame
-    busManager_.receive();
-    CanManager *fcFrame1 = busManager_.getcanMan(); // Replace with actual FC ID
+    busManager_->receive();
+    CanManager *fcFrame1 = busManager_->getcanMan(); // Replace with actual FC ID
 
     auto fcFrame = dynamic_cast<Can *>(fcFrame1);
-    while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
+    while (fcFrame == nullptr || fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
     {
-        busManager_.receive();
-        fcFrame1 = busManager_.getcanMan();
+        delete fcFrame; // Free previously allocated memory
+        busManager_->receive();
+        fcFrame1 = busManager_->getcanMan();
+        fcFrame = dynamic_cast<Can *>(fcFrame1);
     }
 
     // Process Flow Control
@@ -110,6 +124,7 @@ void CanTp::sendMultiFrame(const std::string &message)
         }
         // Wait status (1) would loop back to receive another FC frame if implemented
     }
+    delete fcFrame; // Free allocated memory
 }
 
 void CanTp::sendNextBlock(uint8_t blockSize)
@@ -124,7 +139,7 @@ void CanTp::sendNextBlock(uint8_t blockSize)
         data.insert(data.end(), sendingMessage.begin() + sendingOffset,
                     sendingMessage.begin() + sendingOffset + bytesToSend);
         Can cf(txId_, data);
-        busManager_.send(cf); // Send via BusManager
+        busManager_->send(cf); // Send via BusManager
         sendingOffset += bytesToSend;
         sendingSequence = (sendingSequence + 1) & 0x0F;
         remaining -= bytesToSend;
@@ -135,21 +150,31 @@ void CanTp::sendNextBlock(uint8_t blockSize)
     }
     else
     {
-        // Wait for next Flow Control frame
-        busManager_.receive();
-        CanManager *fcFrame1 = busManager_.getcanMan();
-        auto fcFrame = dynamic_cast<Can *>(fcFrame1);
-        while (fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
-        {
-            busManager_.receive();
+        // If in simulation mode, skip waiting for FC frame and directly send next block
+        CanBus* canBusPtr = dynamic_cast<CanBus*>(busManager_);
+        if (canBusPtr && canBusPtr->isSimulationMode()) {
+            std::cout << "Simulating Flow Control in sendNextBlock (simulation mode)." << std::endl;
+            sendNextBlock(5); // Simulate block size 5
+            return;
+        }
 
-            fcFrame1 = busManager_.getcanMan();
+        // Wait for next Flow Control frame
+        busManager_->receive();
+        CanManager *fcFrame1 = busManager_->getcanMan();
+        auto fcFrame = dynamic_cast<Can *>(fcFrame1);
+        while (fcFrame == nullptr || fcFrame->getId() != rxId_ || (fcFrame->getData().size() > 0 && (fcFrame->getData()[0] >> 4) != 0x30))
+        {
+            delete fcFrame; // Free previously allocated memory
+            busManager_->receive();
+            fcFrame1 = busManager_->getcanMan();
+            fcFrame = dynamic_cast<Can *>(fcFrame1);
         }
         const auto &fcData = fcFrame->getData();
         if (fcData.size() >= 3 && fcData[1] == 0)
         { // ContinueToSend
             sendNextBlock(fcData[2]);
         }
+        delete fcFrame; // Free allocated memory
     }
 }
 
@@ -161,8 +186,8 @@ void CanTp::sendFlowControl(uint8_t flowStatus, uint8_t blockSize, uint8_t separ
     data.push_back(flowStatus);
     data.push_back(blockSize);
     data.push_back(separationTime);
-    Can frame(rxId_, data);  // Send on rxId_ as it's from receiver to sender
-    busManager_.send(frame); // Send via BusManager
+    Can frame(rxId_, data);  // Send on rxId_ as it\"s from receiver to sender
+    busManager_->send(frame); // Send via BusManager
 }
 
 std::string CanTp::receiveMessage(const std::vector<Can> &frames)
@@ -249,12 +274,10 @@ std::string CanTp::receiveMessage(const std::vector<Can> &frames)
 }
 std::string CanTp::receiveMessageP(TransportProtocol &tp, CanManager *cm)
 {
-    std::vector<Can> frames;
-    std::string msg = cm->receiveFrame(tp, cm);
-    while (msg != "")
-
-    {
-        Ecu::encoder(msg);
-    }
-    return receiveMessage(frames);
+    // This function needs to be re-evaluated based on how CanManager is supposed to receive frames.
+    // For now, returning an empty string as a placeholder.
+    std::cerr << "receiveMessageP not fully implemented for dynamic frame reception." << std::endl;
+    return "";
 }
+
+

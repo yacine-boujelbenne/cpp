@@ -4,9 +4,9 @@
 #include <vector>
 #include <iostream>
 #include <cstdio>
+#include "CanManager.hpp" // Inclure CanManager.hpp ici
 
-class CanManager; // Forward declaration
-class Can;
+class Can; // Forward declaration
 
 class BusManager
 {
@@ -31,3 +31,4 @@ private:
     CanManager *canmanager = nullptr;
 };
 #endif // BUSMANAGER_HPP
+

@@ -20,6 +20,7 @@
 #include "Sender.hpp"
 #include "Receiver.hpp"
 #include "Ecu.hpp"
+#include "CanBus.hpp"
 
 void demonstrateBasicCanCommunication()
 {
@@ -41,7 +42,7 @@ void demonstrateBasicCanCommunication()
     frame2.print();
     frame3.print();
 
-    std::cout << "\nNote: Sur Windows, l'envoi réel vers vcan0 n'est pas supporté." << std::endl;
+    std::cout << "\nNote: Sur Windows, l\"envoi réel vers vcan0 n\"est pas supporté." << std::endl;
     std::cout << "Les trames sont affichées pour démonstration." << std::endl;
 
     SLEEP_MS(500); // 500ms
@@ -52,8 +53,20 @@ void demonstrateCanTpCommunication()
     std::cout << "\n=== Démonstration Communication CAN-TP ===\n"
               << std::endl;
 
-    // Création d'une instance CAN-TP
-    CanTp canTp(0x700, 0x708); // TX ID: 0x700, RX ID: 0x708
+    CanBus canBus;
+    if (!canBus.createVCAN())
+    {
+        std::cerr << "Échec de la création de vcan0. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+    if (!canBus.init())
+    {
+        std::cerr << "Échec de l'initialisation du socket CAN. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+
+    // Création d\"une instance CAN-TP
+    CanTp canTp(0x700, 0x708, &canBus); // TX ID: 0x700, RX ID: 0x708
 
     // Test avec un message court (Single Frame)
     std::string shortMessage = "Hello";
@@ -66,6 +79,8 @@ void demonstrateCanTpCommunication()
     std::string longMessage = "Ceci est un message très long qui nécessite plusieurs trames CAN pour être transmis complètement via CAN-TP";
     std::cout << "Envoi message long: \"" << longMessage << "\"" << std::endl;
     canTp.sendMessage(longMessage);
+
+    canBus.closeSocket();
 }
 
 void demonstrateEcuCommunication()
@@ -73,6 +88,21 @@ void demonstrateEcuCommunication()
     std::cout << "\n=== Démonstration Communication ECU ===\n"
               << std::endl;
 
+    CanBus canBus;
+    if (!canBus.createVCAN())
+    {
+        std::cerr << "Échec de la création de vcan0. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+    if (!canBus.init())
+    {
+        std::cerr << "Échec de l'initialisation du socket CAN. La démonstration CAN-TP ne peut pas continuer." << std::endl;
+        return;
+    }
+
+    CanTp canTp(0x700, 0x708, &canBus); // TX ID: 0x700, RX ID: 0x708
+    Can can(0x1, Ecu::encoder("HI I4M SENDER"));
+    Can canr;
     // Création des ECUs
     Sender senderEcu("Engine_ECU", true);
     Receiver receiverEcu("Dashboard_ECU", true);
@@ -80,12 +110,13 @@ void demonstrateEcuCommunication()
     // Configuration des valeurs
     senderEcu.setValue(2500); // RPM du moteur par exemple
 
-    // Simulation de l'envoi de données
+    // Simulation de l\"envoi de données
     std::cout << "=== ECU Sender ===" << std::endl;
-    senderEcu.sendEcuData();
+    std::string msg = "hey bouha";
+    senderEcu.sendEcuData(msg, canTp, can);
 
     std::cout << "\n=== ECU Receiver ===" << std::endl;
-    receiverEcu.receiveEcuData();
+    receiverEcu.receiveEcuData(&receiverEcu, &canTp, can);
 }
 
 void runInteractiveDemo()
@@ -110,7 +141,7 @@ void runInteractiveDemo()
         case 1:
         {
             uint32_t id;
-            std::cout << "Entrez l'ID CAN (décimal, ex: 291 pour 0x123): ";
+            std::cout << "Entrez l\"ID CAN (décimal, ex: 291 pour 0x123): ";
             std::cin >> id;
 
             std::cout << "Entrez le nombre de bytes (1-8): ";
@@ -147,8 +178,20 @@ void runInteractiveDemo()
             std::cin.ignore();
             std::getline(std::cin, message);
 
-            CanTp canTp(0x700, 0x708);
+            CanBus canBus;
+            if (!canBus.createVCAN())
+            {
+                std::cerr << "Échec de la création de vcan0. L'envoi CAN-TP ne peut pas continuer." << std::endl;
+                break;
+            }
+            if (!canBus.init())
+            {
+                std::cerr << "Échec de l'initialisation du socket CAN. L'envoi CAN-TP ne peut pas continuer." << std::endl;
+                break;
+            }
+            CanTp canTp(0x700, 0x708, &canBus);
             canTp.sendMessage(message);
+            canBus.closeSocket();
             break;
         }
         case 3:
@@ -204,8 +247,8 @@ void testCanFrameCreation()
     Can frame3(0x7FF, data3);
     frame3.print();
 
-    // Test de l'encodeur de chaîne
-    std::cout << "\nTest de l'encodeur de chaîne:" << std::endl;
+    // Test de l\"encodeur de chaîne
+    std::cout << "\nTest de l\"encodeur de chaîne:" << std::endl;
     std::string testString = "TEST";
     std::vector<uint8_t> encodedData = Ecu::encoder(testString);
     Can stringFrame(0x555, encodedData);

@@ -1,11 +1,9 @@
+#ifndef CANBUS_HPP
+#define CANBUS_HPP
+
 #include "BusManager.hpp"
-
 #include <cstdint>
-
 #include "Can.hpp"
-
-#ifndef _CANBUS_HPP
-#define _CANBUS_HPP
 
 class CanManager;
 
@@ -22,11 +20,15 @@ public:
     void receive() override;
 
     CanManager *receiveFrame();
+    bool isSimulationMode() const; // Déclaration de la méthode
 
 private:
 #ifdef __linux__
     int socket_fd = -1; // Descripteur du socket CAN
 #endif
+    bool simulation_mode = false; // Déclaration du membre ici, en dehors du #ifdef
 };
 
-#endif
+#endif // CANBUS_HPP
+
+
