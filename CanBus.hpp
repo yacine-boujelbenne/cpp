@@ -1,34 +1,23 @@
-#ifndef CANBUS_HPP
-#define CANBUS_HPP
+#ifndef _CANBUS_HPP
+#define _CANBUS_HPP
 
-#include "BusManager.hpp"
-#include <cstdint>
 #include "Can.hpp"
 
-class CanManager;
-
-class CanBus : public BusManager
-{
+class CanBus {
 public:
-    CanBus();  // Default constructor
-    ~CanBus(); // Default destructor
+    CanBus();
+    ~CanBus();
 
-    bool createVCAN() override;
-    bool init() override;
-    void closeSocket() override;
-    void send(const Can &trame) override;
-    void receive() override;
-
-    CanManager *receiveFrame();
-    bool isSimulationMode() const; // Déclaration de la méthode
+    bool createVCAN();
+    bool init();
+    void closeSocket();
+    void send(Can &frame);
+    Can receiveFrame();
 
 private:
 #ifdef __linux__
-    int socket_fd = -1; // Descripteur du socket CAN
+    int socket_fd = -1;
 #endif
-    bool simulation_mode = false; // Déclaration du membre ici, en dehors du #ifdef
 };
 
-#endif // CANBUS_HPP
-
-
+#endif
