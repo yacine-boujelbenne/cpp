@@ -1,8 +1,5 @@
-#include "BusManager.hpp"
-#include "Can.hpp"
 #include <iostream>
 #include <cstdint>
-#include "CanManager.hpp"
 #include "CanBus.hpp"
 #ifdef __linux__
 #include <cstdlib>
@@ -13,187 +10,157 @@
 #include <linux/can.h>
 #include <linux/can/raw.h>
 #include <net/if.h>
+#include <sys/time.h>  // For timeval
+#include <cerrno>      // For errno
 #endif
 
-CanBus::CanBus()
-{
+CanBus::CanBus() {
 #ifdef __linux__
-    socket_fd = -1; // Initialisation du descripteur de socket
+    socket_fd = -1;
 #endif
-    simulation_mode = false;
 }
 
-CanBus::~CanBus()
-{
+CanBus::~CanBus() {
     closeSocket();
 }
 
-bool CanBus::isSimulationMode() const
-{
-    return simulation_mode;
-}
-
-bool CanBus::createVCAN()
-{
+bool CanBus::createVCAN() {
 #ifdef __linux__
-    int ret = 0;
-    ret = system("modprobe vcan");
-    if (ret != 0)
-    {
-        std::cerr << "Erreur modprobe vcan, passage en mode simulation\n";
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+    int ret = system("sudo modprobe vcan");
+    if (ret != 0) {
+        std::cerr << "Error loading vcan module\n";
+        return false;
     }
-    system("ip link delete vcan0 2>/dev/null");
-    ret = system("ip link add dev vcan0 type vcan");
-    if (ret != 0)
-    {
-        std::cerr << "Erreur création interface vcan0, passage en mode simulation\n";
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+    ret = system("sudo ip link add dev vcan0 type vcan");
+    if (ret != 0) {
+        std::cerr << "Error creating vcan0 interface\n";
+        return false;
     }
-    ret = system("ip link set up vcan0");
-    if (ret != 0)
-    {
-        std::cerr << "Erreur activation interface vcan0, passage en mode simulation\n";
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+    ret = system("sudo ip link set up vcan0");
+    if (ret != 0) {
+        std::cerr << "Error activating vcan0\n";
+        return false;
     }
-    std::cout << "Interface vcan0 créée et activée\n";
+    std::cout << "vcan0 created and activated\n";
     return true;
 #else
-    std::cerr << "createVCAN() only supported on Linux. Mode simulation activé." << std::endl;
-    simulation_mode = true;
-    return true; // Retourner true pour permettre la simulation
+    std::cerr << "VCAN only supported on Linux\n";
+    return false;
 #endif
 }
 
-bool CanBus::init()
-{
+bool CanBus::init() {
 #ifdef __linux__
-    if (simulation_mode) {
-        std::cout << "Mode simulation activé - pas de socket CAN réel\n";
-        return true;
-    }
-    
-    struct ifreq ifr{};
-    struct sockaddr_can addr{};
-
-    socket_fd = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (socket_fd < 0)
-    {
-        perror("Erreur création socket CAN, passage en mode simulation");
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+    if ((socket_fd = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
+        perror("Socket creation failed");
+        return false;
     }
 
-    std::strncpy(ifr.ifr_name, "vcan0", IFNAMSIZ - 1);
-    if (ioctl(socket_fd, SIOCGIFINDEX, &ifr) < 0)
-    {
-        perror("Erreur ioctl, passage en mode simulation");
+    // Set receive timeout to 100ms
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000;  // 100ms
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        perror("setsockopt SO_RCVTIMEO failed");
         close(socket_fd);
-        socket_fd = -1;
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+        return false;
     }
 
+    struct ifreq ifr;
+    std::strcpy(ifr.ifr_name, "vcan0");
+    if (ioctl(socket_fd, SIOCGIFINDEX, &ifr) < 0) {
+        perror("IOCTL failed");
+        close(socket_fd);
+        return false;
+    }
+
+    struct sockaddr_can addr;
     addr.can_family = AF_CAN;
     addr.can_ifindex = ifr.ifr_ifindex;
 
-    if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-    {
-        perror("Erreur bind, passage en mode simulation");
+    if (bind(socket_fd, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+        perror("Bind failed");
         close(socket_fd);
-        socket_fd = -1;
-        simulation_mode = true;
-        return true; // Retourner true pour permettre la simulation
+        return false;
     }
 
-    std::cout << "Socket CAN initialisée sur vcan0\n";
+    std::cout << "CAN socket initialized\n";
     return true;
 #else
-    std::cerr << "Plateforme non supportée, mode simulation activé\n";
-    simulation_mode = true;
-    return true; // Retourner true pour permettre la simulation
+    std::cerr << "CAN init only supported on Linux\n";
+    return false;
 #endif
 }
 
-void CanBus::send(const Can &trame)
-{
+void CanBus::send(Can &frame) {
 #ifdef __linux__
-    if (simulation_mode || socket_fd < 0)
-    {
-        std::cout << "Simulation d'envoi de trame CAN (ID: 0x" << std::hex << trame.getId() << std::dec << ")\n";
+    if (socket_fd < 0) {
+        std::cerr << "CAN socket not initialized\n";
         return;
     }
-    struct can_frame frame{};
-    uint32_t raw_id = trame.getId(); // Récupération de l'ID CAN
-    frame.can_id = trame.isExtendedFrame() ? (raw_id | CAN_EFF_FLAG) : raw_id;
-    frame.can_dlc = trame.getData().size();
-    std::memcpy(frame.data, trame.getData().data(), frame.can_dlc);
-    if (write(socket_fd, &frame, sizeof(frame)) != sizeof(frame))
-    {
-        perror("CAN sending error !");
+
+    struct can_frame raw_frame;
+    raw_frame.can_id = frame.getId();
+    if (frame.isExtendedFrame()) {
+        raw_frame.can_id |= CAN_EFF_FLAG;
     }
-    else
-    {
-        std::cout << "CAN frame sent (ID: 0x" << std::hex << frame.can_id << std::dec << ", " << (int)frame.can_dlc << " octets)\n";
+    
+    const auto& data = frame.getData();
+    raw_frame.can_dlc = data.size();
+    std::copy(data.begin(), data.end(), raw_frame.data);
+    
+    if (write(socket_fd, &raw_frame, sizeof(raw_frame)) != sizeof(raw_frame)) {
+        perror("CAN write error");
+    } else {
+        std::cout << "Sent CAN frame ID: 0x" << std::hex << frame.getId() 
+                  << " DLC: " << std::dec << data.size() << "\n";
     }
-#else
-    std::cout << "Simulation d'envoi de trame CAN (ID: 0x" << std::hex << trame.getId() << std::dec << ")\n";
 #endif
 }
 
-CanManager *CanBus::receiveFrame()
-{
+Can CanBus::receiveFrame() {
 #ifdef __linux__
-    if (simulation_mode || socket_fd < 0)
-    {
-        std::cerr << "Mode simulation - pas de réception CAN réelle\n";
-        return nullptr;
+    if (socket_fd < 0) {
+        return Can();
     }
 
-    struct can_frame canFrame{};
-    ssize_t nbytes = read(socket_fd, &canFrame, sizeof(canFrame));
-
-    if (nbytes < 0)
-    {
-        perror("Erreur lecture CAN");
-        return nullptr;
+    struct can_frame raw_frame;
+    ssize_t nbytes = read(socket_fd, &raw_frame, sizeof(raw_frame));
+    
+    if (nbytes < 0) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // Timeout occurred, no data available
+            return Can();
+        }
+        perror("CAN read error");
+        return Can();
     }
-
-    if (nbytes < sizeof(canFrame))
-    {
-        std::cerr << "Trame CAN incomplète reçue\n";
-        return nullptr;
+    
+    if (nbytes != sizeof(raw_frame)) {
+        std::cerr << "Incomplete CAN frame\n";
+        return Can();
     }
-    // Dynamically allocate Can object
-    Can *frame = new Can(canFrame.can_id, std::vector<uint8_t>(canFrame.data, canFrame.data + canFrame.can_dlc));
-    return frame; // Return pointer to dynamically allocated object
+    
+    uint32_t id = raw_frame.can_id;
+    bool isExtended = (id & CAN_EFF_FLAG) ? true : false;
+    id = isExtended ? (id & CAN_EFF_MASK) : (id & CAN_SFF_MASK);
+    
+    std::vector<uint8_t> data(raw_frame.data, raw_frame.data + raw_frame.can_dlc);
+    
+    Can frame(id, data);
+    frame.setFrameType(isExtended);
+    return frame;
 #else
-    std::cerr << "Mode simulation - pas de réception CAN réelle\n";
-    return nullptr;
+    return Can();
 #endif
 }
 
-void CanBus::closeSocket()
-{
+void CanBus::closeSocket() {
 #ifdef __linux__
-    if (socket_fd >= 0)
-    {
+    if (socket_fd >= 0) {
         close(socket_fd);
         socket_fd = -1;
-        std::cout << "Socket CAN fermée\n";
+        std::cout << "CAN socket closed\n";
     }
 #endif
 }
-
-void CanBus::receive()
-{
-    CanManager *receivedFrame = receiveFrame();
-    if (receivedFrame != nullptr)
-    {
-        BusManager::setcanMan(receivedFrame); // Upcast to base pointer
-    }
-}
-

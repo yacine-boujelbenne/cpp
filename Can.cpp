@@ -1,30 +1,33 @@
-#include <stdexcept>
+
 #include <vector>
-#include "CanManager.hpp"
+
 #include <iostream>
-#include "Can.hpp"
-#include "TransportProtocol.hpp"
-#include "CanTp.hpp"
+
+
+
 #include <iomanip>
-#include "Ecu.hpp"
+
 #include <cstdint>
+#include "Can.hpp"
 
-Can::Can() : id_(0), data_() {}
 
-Can::Can(uint32_t id, const std::vector<uint8_t> &data) : id_(id), data_(data)
+
+
+Can::Can() : id_(0), data_()
 {
-    std::cout << "hey";
-    if (data_.size() > MAX_DATA_LENGTH)
+}
+
+Can::Can(uint32_t id, const std::vector<uint8_t> &data) 
+{
+    this->id_=id;
+    this->data_= data;
+
+    /*if (data_.size() > MAX_DATA_LENGTH)
     {
         std::cout << "Data size exceeds maximum CAN frame length";
-        std::cout << "Calling for CanTp....";
-    }
+    }*/
 }
 
-const std::vector<uint8_t> &Can::getData() const
-{
-    return data_;
-}
 
 void Can::print()
 {
@@ -36,29 +39,24 @@ void Can::print()
     }
     std::cout << std::dec << std::endl;
 }
+/*
 
-void Can::sendFrame(const std::vector<uint8_t> &data, TransportProtocol &tp)
+void Can::sendFrame(CanTp &tp)
 {
     std::cout << "The can start sending";
-    if (data.size() > MAX_DATA_LENGTH)
+    if (data_.size() > 8)
     {
-        // If data size exceeds MAX_DATA_LENGTH, use TransportProtocol to send the message
-        tp.sendMessageP(Ecu::decoder(data));
-    } else {
-        // Otherwise, handle as a regular CAN frame (this part is usually handled by BusManager)
-        // For now, we just print a message.
-        std::cout << "Data fits in a single CAN frame. (ID: 0x" << std::hex << id_ << std::dec << ")\n";
+        std::cout << "Data size exceeds maximum CAN frame length";
+        // Implementation will be handled by BusManager
     }
+    // tp.sendMessageP(Ecu::decoder(data)); // Use TransportProtocol to send the frame
+
+
 }
 
-const uint32_t Can::getId() const
+//this receive methode eleminates the usage of the transport protocol
+void Can::receiveFrame(CanTp &tp)
 {
-    return id_;
-}
-
-std::string Can::receiveFrame(TransportProtocol &tp, CanManager *cm)
-{
-    return tp.receiveMessageP(tp, cm);
-}
-
-
+    this->setData(Can::encoder(tp.receiveMessage()));
+    
+}*/
