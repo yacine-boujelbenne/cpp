@@ -1,12 +1,12 @@
 #include <cstdint>
-#include "CanTp.hpp"
+#include "../headers/CanTp.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <chrono>
 #include <thread>
-#include "Can.hpp"
-#include "CanBus.hpp"
+#include "../headers/Can.hpp"
+#include "../headers/CanBus.hpp"
 
 static const size_t MAX_SF_DATA = 7;
 static const size_t MAX_CF_DATA = 6;

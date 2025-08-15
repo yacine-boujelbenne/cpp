@@ -12,10 +12,10 @@
 #endif
 
 
-#include "Can.hpp"
-#include "CanTp.hpp"
-#include "Sender.hpp"
-#include "Receiver.hpp"
+#include "../headers/Can.hpp"
+#include "../headers/CanTp.hpp"
+#include "../headers/Sender.hpp"
+#include "../headers/Receiver.hpp"
 
 
 void demonstrateBasicCanCommunication()
