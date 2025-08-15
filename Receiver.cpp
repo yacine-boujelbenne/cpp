@@ -3,7 +3,7 @@
 #include <cstdint>
 
 
-#include "../headers/Receiver.hpp"
+#include "./headers/Receiver.hpp"
 
 Receiver::Receiver(std::string name, bool available)
   
