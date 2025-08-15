@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cstdint>
-#include "./headers/CanBus.hpp"
+#include "../headers/CanBus.hpp"
 #ifdef __linux__
 #include <cstdlib>
 #include <cstring>

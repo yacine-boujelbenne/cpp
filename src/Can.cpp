@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include <cstdint>
-#include "./headers/Can.hpp"
+#include "../headers/Can.hpp"
 
 
 

@@ -6,7 +6,7 @@
 
 
 
-#include "./headers/Sender.hpp"
+#include "../headers/Sender.hpp"
 
 Sender::Sender(const std::string &name, bool available)// Assuming CanManager is a member of Sender class
 {
