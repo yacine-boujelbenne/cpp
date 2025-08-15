@@ -1,7 +1,7 @@
 #include <iostream>
 #include <ostream>
 #include <thread>
-#include "../headers/CanTp.hpp"
+#include "./headers/CanTp.hpp"
 
 void receiverThread(CanTp* receiver) {
     std::cout << "Receiver started\n";

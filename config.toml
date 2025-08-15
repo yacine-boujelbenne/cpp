@@ -1,0 +1,8 @@
+[[runners]]
+  name = "CAN Runner"
+  url = "https://gitlab.com/"
+  token = "TOKEN"
+  executor = "docker"
+  [runners.docker]
+    privileged = true
+    volumes = ["/cache"]
