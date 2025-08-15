@@ -1,9 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <sstream>
-#include <iomanip>
-#include <thread>
 #include <cstdint>
 
 #ifdef _WIN32
@@ -14,12 +11,12 @@
 #define SLEEP_MS(x) usleep((x) * 1000)
 #endif
 
-#include "BusManager.hpp"
-#include "Can.hpp"
-#include "CanTp.hpp"
-#include "Sender.hpp"
-#include "Receiver.hpp"
-#include "Ecu.hpp"
+
+#include "../headers/Can.hpp"
+#include "../headers/CanTp.hpp"
+#include "../headers/Sender.hpp"
+#include "../headers/Receiver.hpp"
+
 
 void demonstrateBasicCanCommunication()
 {
@@ -38,11 +35,9 @@ void demonstrateBasicCanCommunication()
     // Affichage des trames avant envoi
     std::cout << "Trames à envoyer:" << std::endl;
     frame1.print();
+
     frame2.print();
     frame3.print();
-
-    std::cout << "\nNote: Sur Windows, l'envoi réel vers vcan0 n'est pas supporté." << std::endl;
-    std::cout << "Les trames sont affichées pour démonstration." << std::endl;
 
     SLEEP_MS(500); // 500ms
 }
@@ -53,19 +48,18 @@ void demonstrateCanTpCommunication()
               << std::endl;
 
     // Création d'une instance CAN-TP
-    CanTp canTp(0x700, 0x708); // TX ID: 0x700, RX ID: 0x708
+    CanTp canTp(0x700, 0x700); // TX ID: 0x700, RX ID: 0x700e
 
-    // Test avec un message court (Single Frame)
-    std::string shortMessage = "Hello";
-    std::cout << "Envoi message court: \"" << shortMessage << "\"" << std::endl;
-    canTp.sendMessage(shortMessage);
 
-    std::cout << std::endl;
 
-    // Test avec un message long (Multi Frame)
-    std::string longMessage = "Ceci est un message très long qui nécessite plusieurs trames CAN pour être transmis complètement via CAN-TP";
-    std::cout << "Envoi message long: \"" << longMessage << "\"" << std::endl;
-    canTp.sendMessage(longMessage);
+        // Test avec un message long (Multi Frame)
+        std::string longMessage = "Ceci est un message très long qui nécessite plusieurs trames CAN pour être transmis complètement via CAN-TP";
+        std::cout << "Envoi message long: \"" << longMessage << "\"" << std::endl;
+        canTp.sendMessageP(longMessage);
+
+    
+
+    
 }
 
 void demonstrateEcuCommunication()
@@ -73,21 +67,19 @@ void demonstrateEcuCommunication()
     std::cout << "\n=== Démonstration Communication ECU ===\n"
               << std::endl;
 
+
+    CanTp canTp(0x700, 0x700); // TX ID: 0x700, RX ID: 0x708
+
     // Création des ECUs
     Sender senderEcu("Engine_ECU", true);
-    Receiver receiverEcu("Dashboard_ECU", true);
 
     // Configuration des valeurs
-    senderEcu.setValue(2500); // RPM du moteur par exemple
 
-    // Simulation de l'envoi de données
+    // Simulation de l\"envoi de données
     std::cout << "=== ECU Sender ===" << std::endl;
-    senderEcu.sendEcuData();
-
-    std::cout << "\n=== ECU Receiver ===" << std::endl;
-    receiverEcu.receiveEcuData();
+    std::string msg = "hey. im a transmitter i send data.";
+    senderEcu.sendEcuData(msg, canTp);
 }
-
 void runInteractiveDemo()
 {
     std::cout << "\n=== Mode Interactif (Simulation Windows) ===\n"
@@ -147,8 +139,8 @@ void runInteractiveDemo()
             std::cin.ignore();
             std::getline(std::cin, message);
 
-            CanTp canTp(0x700, 0x708);
-            canTp.sendMessage(message);
+            CanTp canTp(0x700, 0x700);
+            canTp.sendMessageP(message);
             break;
         }
         case 3:
@@ -181,6 +173,23 @@ void runInteractiveDemo()
     }
 }
 
+void receivingmode(){
+    CanTp canTp(0x700, 0x700); // TX ID: 0x700, RX ID: 0x708e
+
+    std::cout << "receiving frames..." << std::endl;
+    //canTp.receiveMessageP(canTp.getbus().getcanMan());
+    //std::cout<<Ecu::decoder(canTp.getbus().getcanMan()->getData());
+    std::cout<<canTp.receiveMessage()<<std::endl;
+}
+
+void receiveECU(){
+    Receiver rec("rec", true);
+    CanTp canTp(0x700, 0x700); // TX ID: 0x700, RX ID: 0x708e
+    rec.receiveEcuData(canTp);
+   
+
+}
+
 void testCanFrameCreation()
 {
     std::cout << "\n=== Test de Création de Trames CAN ===\n"
@@ -189,10 +198,11 @@ void testCanFrameCreation()
     // Test de différentes tailles de données
     std::cout << "Test avec différentes tailles de données:" << std::endl;
 
-    // Trame avec 1 byte
+    // Trame avec 1 byte et avec l option 
     std::vector<uint8_t> data1 = {0xFF};
-    Can frame1(0x001, data1);
-    frame1.print();
+    Can frame(0x001, data1);
+    frame.print();
+    std::cout<<(int)frame.getId()<<std::endl;
 
     // Trame avec 4 bytes
     std::vector<uint8_t> data2 = {0xDE, 0xAD, 0xBE, 0xEF};
@@ -207,7 +217,7 @@ void testCanFrameCreation()
     // Test de l'encodeur de chaîne
     std::cout << "\nTest de l'encodeur de chaîne:" << std::endl;
     std::string testString = "TEST";
-    std::vector<uint8_t> encodedData = Ecu::encoder(testString);
+    std::vector<uint8_t> encodedData = Can::encoder(testString);
     Can stringFrame(0x555, encodedData);
     stringFrame.print();
 }
@@ -227,11 +237,13 @@ int main()
                   << std::endl;
         std::cout << "1. Démonstration Communication CAN de base" << std::endl;
         std::cout << "2. Démonstration CAN Transport Protocol (CAN-TP)" << std::endl;
-        std::cout << "3. Démonstration Communication ECU" << std::endl;
+        std::cout << "3. Démonstration Transmission par ECU" << std::endl;
         std::cout << "4. Mode Interactif" << std::endl;
         std::cout << "5. Test de création de trames CAN" << std::endl;
         std::cout << "6. Test de performance (simulation)" << std::endl;
-        std::cout << "7. Quitter" << std::endl;
+        std::cout << "7. Reception avec canTp" << std::endl;
+        std::cout << "8. Reception avec Ecu" << std::endl;
+        std::cout << "9. Quitter" << std::endl;
         std::cout << "Choix: ";
 
         int choice;
@@ -278,6 +290,11 @@ int main()
             break;
         }
         case 7:
+            receivingmode();
+            break;
+        case 8:
+            receiveECU();
+        case 9:
             std::cout << "Fermeture du programme..." << std::endl;
             return 0;
         default:

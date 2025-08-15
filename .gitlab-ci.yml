@@ -1,0 +1,62 @@
+image: ubuntu:22.04
+
+stages:
+  - build
+  - static_analysis
+  - unit_test
+  - integration_test
+
+variables:
+  BUILD_DIR: "build"
+
+before_script:
+  - apt-get update
+  - apt-get install -y build-essential cmake libgtest-dev cppcheck can-utils kmod linux-modules-extra-$(uname -r) git
+  # Build and install Google Test
+  - cd /usr/src/gtest
+  - sudo cmake CMakeLists.txt
+  - sudo make
+  - sudo cp lib/*.a /usr/lib
+  - cd -
+
+build:
+  stage: build
+  script:
+    - mkdir -p ${BUILD_DIR}
+    - cd ${BUILD_DIR}
+    - cmake -DCMAKE_BUILD_TYPE=Debug ..
+    - make
+  artifacts:
+    paths:
+      - ${BUILD_DIR}
+
+static_analysis:
+  stage: static_analysis
+  script:
+    - cppcheck --enable=all --suppress=missingIncludeSystem --suppress=unusedFunction --error-exitcode=1 --inline-suppr --std=c++17 \
+      Can.cpp CanBus.cpp CanTp.cpp Main.cpp Receiver.cpp Sender.cpp
+
+unit_test:
+  stage: unit_test
+  dependencies:
+    - build
+  script:
+    - cd ${BUILD_DIR}
+    - ctest --verbose --output-on-failure
+
+integration_test:
+  stage: integration_test
+  dependencies:
+    - build
+  script:
+    # Setup virtual CAN interface
+    - sudo modprobe vcan
+    - sudo ip link add dev vcan0 type vcan
+    - sudo ip link set up vcan0
+    - cd ${BUILD_DIR}
+    # Run tests with automated input
+    - echo -e "5\n\n6\n\n9\n" | ./Main
+  artifacts:
+    paths:
+      - ${BUILD_DIR}/test_output.log
+    when: always

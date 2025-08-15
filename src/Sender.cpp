@@ -1,13 +1,14 @@
 #include <iostream>
 
-#include <vector>
-#include "Sender.hpp"
+
+
 #include <cstdint>
-#include "CanManager.hpp"
 
-#include "Ecu.hpp"
 
-Sender::Sender(const std::string &name, bool available) : Ecu(name, available) // Assuming CanManager is a member of Sender class
+
+#include "../headers/Sender.hpp"
+
+Sender::Sender(const std::string &name, bool available)// Assuming CanManager is a member of Sender class
 {
 
     availability = available; // Initialize availability
@@ -22,15 +23,15 @@ Sender::~Sender()
 {
     std::cout << "Sender destructor called" << std::endl;
 }
-void Sender::sendEcuData(std::string &msg, TransportProtocol &tp, CanManager &can_manager)
+void Sender::sendEcuData(std::string &msg, CanTp &tp)
 {
     std::cout << "Sending data from Sender ECU: " << getEcuName() << std::endl;
     // Simulate sending data
-    if (isAvailable())
+    if (this->isAvailable())
     {
-        std::cout << "ECU is available. Sent data: " << msg << std::endl;
-        can_manager.sendFrame(Ecu::encoder(msg), tp); // Assuming CanManager has an encoder method
 
+        std::cout << "ECU is available. Sent data: " << msg << std::endl;
+        tp.sendMessageP(msg);
         std::cout << "Ecu sender has sent the data to the CanManager\n";
     }
     else
@@ -58,7 +59,7 @@ bool Sender::isAvailable() const
 uint32_t Sender::getValue() const
 {
     // Placeholder implementation, should be overridden in derived classes
-    return 0x00000000;
+    return 0x1;
 }
 void Sender::setValue(int32_t value)
 {

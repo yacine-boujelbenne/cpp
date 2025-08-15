@@ -1,12 +1,12 @@
 #include <iostream>
-#include "Ecu.hpp"
 #include <string>
-#include "Receiver.hpp"
 #include <cstdint>
-#include "CanManager.hpp"
+
+
+#include "../headers/Receiver.hpp"
 
 Receiver::Receiver(std::string name, bool available)
-    : Ecu(name, available)
+  
 {
     availability = available; // Initialize availability
     ECUName = name;
@@ -19,18 +19,23 @@ Receiver::~Receiver()
     std::cout << "Receiver destructor called" << std::endl;
 }
 
-std::string Receiver::receiveEcuData(Ecu *ecu, TransportProtocol *tp, CanManager &can_manager)
+void Receiver::receiveEcuData(CanTp &tp)
 {
-    if (ecu->isAvailable())
+    int rep =1;
+    while (this->isAvailable())
     {
-        std::cout << "ECU is available. Received value: " << static_cast<int>(ecu->getValue()) << std::endl;
-        return can_manager.receiveFrame(*tp, &can_manager);
+
+        std::cout << "ECU is available. Start receiving...." << std::endl;
+        std::cout<<tp.receiveMessage()<<std::endl;
+
     }
-    else
+    
+    if (this->isAvailable()==false)
     {
         std::cout << "ECU is not available. Cannot receive data." << std::endl;
-        return "";
+
     }
+    
 }
 
 void Receiver::setEcuName(const std::string &name)
