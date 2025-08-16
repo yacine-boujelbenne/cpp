@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcantp_lib.a CMakeFiles/cantp_lib.dir/src/Can.cpp.o CMakeFiles/cantp_lib.dir/src/CanBus.cpp.o CMakeFiles/cantp_lib.dir/src/CanTp.cpp.o CMakeFiles/cantp_lib.dir/src/Receiver.cpp.o CMakeFiles/cantp_lib.dir/src/Sender.cpp.o
+/usr/bin/ranlib libcantp_lib.a
