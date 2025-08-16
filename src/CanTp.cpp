@@ -89,7 +89,7 @@ void CanTp::sendMultiFrame(bool first) {
     
     while (!fcReceived && std::chrono::steady_clock::now() - start < timeout) {
         Can fcFrame = busTp_.receiveFrame();
-        std::cout << Can::decoder(fcFrame.getData())<<std::endl;
+        std::cout << Can::decoder(fcFrame.getData())<<std::endl;//USED for debugging and knowing if it's empty or not
         if (fcFrame.getId() == rxId_ && !fcFrame.getData().empty()) {
             uint8_t pci = fcFrame.getData()[0];
             uint8_t frameType = (pci >> 4) & 0x0F;
