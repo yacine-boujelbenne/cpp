@@ -128,6 +128,16 @@
     "thread": "cpp",
     "typeindex": "cpp",
     "valarray": "cpp",
-    "queue": "cpp"
-  }
+    "queue": "cpp",
+    "string_view": "cpp"
+  },
+  "python.testing.unittestArgs": [
+    "-v",
+    "-s",
+    "./googletest",
+    "-p",
+    "*test.py"
+  ],
+  "python.testing.pytestEnabled": false,
+  "python.testing.unittestEnabled": true
 }
