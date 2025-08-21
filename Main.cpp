@@ -124,6 +124,7 @@ void runInteractiveDemo()
                     val = 0;
                 if (val > 255)
                     val = 255;
+                    
                 data.push_back(static_cast<uint8_t>(val));
             }
 

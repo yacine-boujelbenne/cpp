@@ -55,9 +55,12 @@ void CanTp::sendMessage(const std::string &message) {
 
 void CanTp::sendSingleFrame(const std::string &message) {
     std::vector<uint8_t> data;
+    std::cout<<"Sending single frame with Id : "<< txId_<<std::endl;
     uint8_t pci = (0x00 << 4) | (message.size() & 0x0F);
     data.push_back(pci);
+    std::cout<< "The PCI : "<<pci<<std::endl;
     data.insert(data.end(), message.begin(), message.end());
+    std::cout<<"The Single frame DATA : "<< data.data()<<std::endl;
     Can frame(txId_, data);
     frame.setFrameType(txId_ > 0x7FF);
     busTp_.send(frame);
@@ -66,6 +69,11 @@ void CanTp::sendSingleFrame(const std::string &message) {
 void CanTp::sendMultiFrame(bool first) {
     if (first){
         // Send First Frame
+        std::cout<<"   =========================================================="<<std::endl;
+        std::cout<<"   =========================================================="<<std::endl;
+        std::cout<<"   "<<std::endl;
+
+        std::cout<<"Sending first frame with Id : "<< txId_<<std::endl;
         std::vector<uint8_t> data;
         uint16_t length = sendingMessage.size();
         uint8_t pci1 = 0x10 | ((length >> 8) & 0x0F);
@@ -77,11 +85,17 @@ void CanTp::sendMultiFrame(bool first) {
         sendingOffset = dataBytes;
         
         Can frame(txId_, data);
+
         frame.setFrameType(txId_ > 0x7FF);
+        frame.print();
         busTp_.send(frame);
-        std::cout << "Sent First Frame\n";
+        std::cout<<"   "<<std::endl;
+
+        std::cout<<"   =========================================================="<<std::endl;
+        std::cout<<"   =========================================================="<<std::endl;
+
         }
-    // Wait for Flow Control frame with timeout
+    std::cout<<"       =======  Wait for Flow Control frame with timeout ========"<<std::endl;
     auto start = std::chrono::steady_clock::now();
     const std::chrono::seconds timeout(2);
     bool fcReceived = false;
@@ -89,6 +103,7 @@ void CanTp::sendMultiFrame(bool first) {
     
     while (!fcReceived && std::chrono::steady_clock::now() - start < timeout) {
         Can fcFrame = busTp_.receiveFrame();
+        
         std::cout << Can::decoder(fcFrame.getData())<<std::endl;//USED for debugging and knowing if it's empty or not
         if (fcFrame.getId() == rxId_ && !fcFrame.getData().empty()) {
             uint8_t pci = fcFrame.getData()[0];
@@ -100,22 +115,23 @@ void CanTp::sendMultiFrame(bool first) {
                 if (fcData.size() >= 3) {
                     uint8_t flowStatus = fcData[0] & 0x0F;
                     uint8_t blockSize = fcData[1];
+                    std::cout<< blockSize<<std::endl;
                     
                     if (flowStatus == 0) {
-                        std::cout << "Received Flow Control (Continue)\n";
+                        std::cout << "==========  Received Flow Control (Continue)  ===========\n";
 
-                        sendNextBlock(blockSize);
+                        sendNextBlock(this->bs);
                         
                         
                         
 
                     } else if (flowStatus == 1) {
-                        std::cout << "Received Flow Control (Wait)\n";
+                        std::cout << "============  Received Flow Control (Wait)  ===========\n";
                         // Implement wait if needed
-                        sendNextBlock(blockSize);
+
 
                     } else {
-                        std::cerr << "Flow Control: Overflow abort\n";
+                        std::cerr << "============  Flow Control: Overflow abort  ===========\n";
                         this->sendingMultiFrame = false;
                     }
                 }
@@ -146,6 +162,9 @@ void CanTp::sendNextBlock(uint8_t blockSize) {
         cf.setFrameType(txId_ > 0x7FF);
         busTp_.send(cf);
         std::cout << "Sent Consecutive Frame #" << (int)sendingSequence << "\n";
+        std::cout<<"   =========================================================="<<std::endl;
+        std::cout<<"   "<<std::endl;
+        cf.print();
         
         sendingOffset += bytesToSend;
         sendingSequence = (sendingSequence + 1) & 0x0F;
@@ -156,7 +175,7 @@ void CanTp::sendNextBlock(uint8_t blockSize) {
     if (sendingOffset >= sendingMessage.size()) {
         this->sendingMultiFrame = false;
         situation = false;
-        std::cout << "Multi-frame transmission complete\n";
+        std::cout << "=============  Multi-frame transmission complete  ============\n";
     }
     else {
         this->sendingMultiFrame = true;
@@ -195,6 +214,8 @@ std::string CanTp::receiveMessage() {
         if (frameType == 0x0) { // Single Frame
             uint8_t length = pci & 0x0F;
             if (length > 0 && data.size() > 1) {
+                std::cout<<"=========== Received single frame =========="<<std::endl;
+                frame.print();
                 return std::string(data.begin() + 1, data.begin() + 1 + length);
             }
         }
@@ -209,18 +230,20 @@ std::string CanTp::receiveMessage() {
             this->receivingSequence = 1;
             this->receivingMultiFrame = true;
             
-            std::cout << "Received First Frame, length: " << this->receivingTotalLength << "\n";
+            std::cout << "============= Received First Frame, length: " << this->receivingTotalLength << " ============\n";
+            frame.print();
             }
             // Send Flow Control Continue to the SENDER'S RX ID
-            this->sendFlowControl(0x00, 8, 0, txId_);  // FIXED: Use sender's rxId
-            std::cout << "Sent Flow Control (Continue) to 0x" << std::hex << txId_ << std::dec << "\n";
+            std::cout << "============ Sent Flow Control (Continue) to 0x" << std::hex << txId_ << std::dec << "============\n";
+
+            this->sendFlowControl(0x00, this->bs, this->st, txId_);  // FIXED: Use sender's rxId
             
             // Start receiving consecutive frames
             while (this->receivingOffset < this->receivingTotalLength && retryCount < MAX_RETRIES) {
                 Can cf = busTp_.receiveFrame();
                 if (cf.getId() == 0) {  // Timeout
                     retryCount++;
-                    this->sendFlowControl(0x00, 8, 0, txId_);  // FIXED: Use sender's rxId
+                    this->sendFlowControl(0x00, this->bs, this->st, txId_);  // FIXED: Use sender's rxId
 
                     continue;
                 }
@@ -232,7 +255,7 @@ std::string CanTp::receiveMessage() {
                 
                 const auto& cfData = cf.getData();
                 if (cfData.empty()) {
-                    this->sendFlowControl(0x00, 8, 0, txId_);  // FIXED: Use sender's rxId
+                    this->sendFlowControl(0x00, this->bs, this->st, txId_);  // FIXED: Use sender's rxId
 
                     retryCount++;
                     continue;
@@ -242,7 +265,7 @@ std::string CanTp::receiveMessage() {
                 uint8_t cfFrameType = (cfPci >> 4) & 0x0F;
                 
                 if (cfFrameType != 0x2) { // Not Consecutive Frame
-                    this->sendFlowControl(0x00, 8, 0, txId_);  // FIXED: Use sender's rxId
+                    this->sendFlowControl(0x00, this->bs, this->st, txId_);  // FIXED: Use sender's rxId
 
                     continue;
                 }
@@ -272,6 +295,9 @@ std::string CanTp::receiveMessage() {
                 std::cout << "Received Consecutive Frame #" << (int)sequence 
                           << ", progress: " << receivingOffset << "/" 
                           << receivingTotalLength << "\n";
+                cf.print();
+                std::cout<<"   =========================================================="<<std::endl;
+                std::cout<<"   "<<std::endl;
             }
             
             if (receivingOffset >= receivingTotalLength) {
@@ -288,111 +314,22 @@ std::string CanTp::receiveMessage() {
         
     }
     
-    std::cerr << "Failed to receive message after " << MAX_RETRIES << " attempts\n";
+    std::cerr << "====== Failed to receive message after " << MAX_RETRIES << " attempts =======\n";
     return "";
 }
 
 void CanTp::sendFlowControl(uint8_t flowStatus, uint8_t blockSize, 
                            uint8_t separationTime, uint32_t targetId) {
+    std::cout<<"   =========================================================="<<std::endl;
+    std::cout<<"Block Size : "<<blockSize<<" Seperation time : "<< separationTime<<std::endl;
     std::vector<uint8_t> data;
     data.push_back(0x30 | (flowStatus & 0x0F));
     data.push_back(blockSize);
     data.push_back(separationTime);
     Can fcFrame(targetId, data);
     fcFrame.setFrameType(targetId > 0x7FF);
+    std::cout<<"   =========================================================="<<std::endl;
+    std::cout<<"   "<<std::endl;
     busTp_.send(fcFrame);
-}
-/*std::string CanTp::receiveCon(int& retryCount){
-                // Start receiving consecutive frames
-    while (receivingOffset+10 < receivingTotalLength && retryCount < 1000) {
-        std::cout<< receivingOffset<< " " << receivingTotalLength<< " "<<retryCount <<std::endl;
-    
-        Can cf = busTp_.receiveFrame();
-        const auto& cfData = cf.getData();
-        uint8_t cfPci = cfData[0];
-        uint8_t cfFrameType = (cfPci >> 4) & 0x0F;
-        uint8_t sequence = cfPci & 0x0F;
-        std::cout<< cf.getId()<<std::endl;
-        if (cf.getId() == 0) {  // Timeout
-            //this->sendFlowControl(0x00, 8, 10, txId_);  // FIXED: Use sender's rxId
-    
-            retryCount++;
-    
-      
-    
-        }
-                    
-        if (cf.getId() != rxId_) {
-            retryCount++;
-    
-            continue;
-    
-        }
-                    
-                   
-        if (cfData.empty()) {
-    
-            retryCount++;
-    
-            continue;
-    
-        }
-                    
-    
-                    
-        if (cfFrameType != 0x2) { // Not Consecutive Frame
-    
-            retryCount++;
-            //this->sendFlowControl(0x00, 8, 10, txId_);  // FIXED: Use sender's rxId
-    
-    
-            continue;
-    
-        }
-                    
-                    
-        if (sequence != this->receivingSequence) {
-            std::cerr << "Sequence error: expected " 
-                        << (int)receivingSequence << ", got " 
-                            << (int)sequence << "\n";
-                                
-            retryCount++;
-            continue;
-        }
-                    
-        // Valid consecutive frame
-        size_t bytesToCopy = std::min<size_t>(
-            cfData.size() - 1,
-            receivingTotalLength - receivingOffset
-            );
-                    
-        this->receivingBuffer.insert(receivingBuffer.end(), 
-                                         cfData.begin() + 1, 
-                                         cfData.begin() + 1 + bytesToCopy);
-        this->receivingOffset += bytesToCopy;
-        this->receivingSequence = (receivingSequence + 1) % 16;
-        retryCount = 0;  // Reset retry count on successful frame
-                    
-                    std::cout << "Received Consecutive Frame #" << (int)sequence 
-                              << ", progress: " << receivingOffset << "/" 
-                              << receivingTotalLength << "\n";
-                }
-                
-        if (receivingOffset >= receivingTotalLength) {
-                    this->receivingMultiFrame = false;
-                    this->sendingMultiFrame = false;
-                    situation = false;
-                    return std::string(receivingBuffer.begin(), 
-                                       receivingBuffer.begin() + receivingTotalLength);
-            } else{
-                
-                // Wait for Flow Control frame with timeout
-            auto start = std::chrono::steady_clock::now();
-            const std::chrono::seconds timeout(2);   
-            //this->sendFlowControl(0x00, 8, 10, txId_);  // FIXED: Use sender's rxId
 
-            std::cout << "Sent Flow Control (Continue) to 0x" << std::hex << txId_ << std::dec << "\n";
-            return receiveCon(retryCount);
-        }
-    
-}*/
+}
