@@ -13,8 +13,8 @@ public:
     CanTp(uint32_t txId, uint32_t rxId, CanBus &bus);
     CanTp(uint32_t txId, uint32_t rxId);
     ~CanTp();
-    const static uint8_t staticBS = 0x1b;
-    const static uint8_t staticST = 0xf0;
+    const static uint8_t staticBS = static_cast<uint8_t>(16);
+    const static uint8_t staticST = static_cast<uint8_t>(100);
 
     void sendMessage(const std::string &message);
     void sendMessageP(const std::string &message);

@@ -9,7 +9,7 @@
 #include "./headers/Sender.hpp"
 
 void idSettings(CanTp &tp, int &idT, int &idR){
-    std::cout<<"   Please ener the Tx and Rx configuration (the both values need to be between 0x7FF and 0x001, between 2047 and 1 in decimal)"<<std::endl;
+    std::cout<<"             (o) > Please ener the Tx and Rx configuration (the both values need to be between 0x7FF and 0x001, between 2047 and 1 in decimal)"<<std::endl;
     std::cout<<"        Tx: ";
     std::cin>>idT;
     std::cout<<"        Rx: ";
@@ -20,9 +20,9 @@ void idSettings(CanTp &tp, int &idT, int &idR){
 }
 void busSettings(CanTp &tp){
     while (true) {
+        std::cout<<"    ===================================================="<<std::endl;
     
-    
-
+        std::cout<<" ** This settings is impacting only on the receiving part !**"<<std::endl;
         std::cout<<"    ===================================================="<<std::endl;
         std::cout<<"    =================  Bus settings   ================"<<std::endl;
         std::cout<<"    ==================================================="<<std::endl;
@@ -32,20 +32,21 @@ void busSettings(CanTp &tp){
         std::cout<<"    ==================================================="<<std::endl;
         std::cout<<"    ==================================================="<<std::endl;
     
-        int rep;
+        int rep;std::cout<<"   (o) > ";
         std::cin>>rep;
+        
         switch(rep){
             case 1:
             {
-                std::cout<<"enter the new Seperation time !"<<std::endl;
+                std::cout<<"            -- Enter the new Seperation time : ";
                 int s;
                 std::cin>>s;
                 tp.setst(static_cast<uint8_t>(s));
-                if (s > 0 && static_cast<uint8_t>(s) >= tp.staticST){
+                if (s > 0 && static_cast<uint8_t>(s) <= tp.staticST){
                     tp.setbs(static_cast<uint8_t>(s));
                 }
                 else{
-                    std::cout<<"Invalid Seperation Time ! please try again ."<<std::endl;
+                    std::cout<<"            -- Invalid Seperation Time ! please try again ."<<std::endl;
                 }
                
                 break;
@@ -53,14 +54,14 @@ void busSettings(CanTp &tp){
             }
             case 2:
             {
-                std::cout<<"enter the new Block Size !"<<std::endl;
+                std::cout<<"            -- Enter the new Block Size : ";
                 int b;
                 std::cin>>b;
-                if (b > 0 && static_cast<uint8_t>(b) >= tp.staticBS){
+                if (b > 0 && static_cast<uint8_t>(b) <= tp.staticBS){
                     tp.setbs(static_cast<uint8_t>(b));
                 }
                 else{
-                    std::cout<<"Invalid Block Size ! please try again ."<<std::endl;
+                    std::cout<<"            -- Invalid Block Size ! please try again ."<<std::endl;
                 }
                 break;
             }
@@ -89,6 +90,7 @@ void setting(CanTp &tp, int &idT, int &idR){
     std::cout<<"    ===================================================="<<std::endl;
 
     int rep;
+    std::cout<<"   (o) > ";
     std::cin>>rep;
     switch(rep){
         case 1:
@@ -117,11 +119,13 @@ void setting(CanTp &tp, int &idT, int &idR){
 int main() {
     try {
         int idR, idT;
-        std::cout<<"                              ========================================"<<std::endl;
-        std::cout<<"                      =========================================================="<<std::endl;
-        std::cout<<"                      ========== Welcome to Virtual CAN Simulator app =========="<<std::endl;
-        std::cout<<"                      =========================================================="<<std::endl;
-        std::cout<<"   Please ener the Tx and Rx configuration (the both values need to be between 0x7FF and 0x001, between 2047 and 1 in decimal)"<<std::endl;
+        std::cout<<"    =========================================================="<<std::endl;
+        std::cout<<"    ========== Welcome to Virtual CAN Simulator app =========="<<std::endl;
+        std::cout<<"    =========================================================="<<std::endl;
+        std::cout<<"     "<<std::endl;
+        std::cout<<"                              "<<std::endl;
+
+        std::cout<<"             (o) > Please ener the Tx and Rx configuration (the both values need to be between 0x7FF and 0x001, between 2047 and 1 in decimal)"<<std::endl;
         std::cout<<"   Tx: ";
         std::cin>>idT;
         std::cout<<"   Rx: ";
@@ -134,11 +138,14 @@ int main() {
         std::cout<<"                     Creating a new Ecu...."<<std::endl;
         std::cout<<"   =========================================================="<<std::endl;
 
-        std::cout<<"        Please enter the Ecu name: ";
+        std::cout<<"             (o) > Please enter the Ecu name: ";
         std::string name;
         std::cin>>name;
 
         bool availability= true;
+        std::cout<<"    ===================================================="<<std::endl;
+        std::cout<<"    ========== The envirement is ready to go! =========="<<std::endl;
+        std::cout<<"    ===================================================="<<std::endl;
 
         // Send the message
         int rep=-1;
@@ -147,16 +154,15 @@ int main() {
         
     
             std::cout<<"    ===================================================="<<std::endl;
-            std::cout<<"    ========== The envirement is ready to go! =========="<<std::endl;
+            std::cout<<"    ==============           Home          ============="<<std::endl;
             std::cout<<"    ===================================================="<<std::endl;
-            std::cout<<"    ====        (1) > Send a message.                ==="<<std::endl;
-            std::cout<<"    ====        (2) > receive a message.             ==="<<std::endl;
-            std::cout<<"    ====        (3) > Settings.                      ==="<<std::endl;
-            std::cout<<"    ====        (0) > Quit.                          ==="<<std::endl;
+            std::cout<<"    ====        (1) > Send a message.               ===="<<std::endl;
+            std::cout<<"    ====        (2) > receive a message.            ===="<<std::endl;
+            std::cout<<"    ====        (3) > Settings.                     ===="<<std::endl;
+            std::cout<<"    ====        (0) > Quit.                         ===="<<std::endl;
             std::cout<<"    ===================================================="<<std::endl;
             std::cout<<"    ===================================================="<<std::endl;
-
-
+            std::cout<<"   (o) > ";
 
             std::cin>>rep;
             switch (rep)
@@ -164,7 +170,7 @@ int main() {
                 case 1:
                     {
                         Sender s(name, availability);
-                        std::cout<<"              Enter the message to send :  ";
+                        std::cout<<"             (o) > Enter the message to send :  ";
 
 
 
@@ -182,7 +188,7 @@ int main() {
                         Receiver r(name, availability);
 
                         r.receiveEcuData(tp);
-                        std::cout<<r.getmessage()<<std::endl;
+                        std::cout<<"    ====              Done receiving !              ===="<<std::endl;
                         break;
 
                     }
@@ -194,7 +200,7 @@ int main() {
                 case 0:
                     {
                         std::cout<<"   =========================================================="<<std::endl;
-                        std::cout << "              Closing the app..." << std::endl;
+                        std::cout << "          Closing the app..." << std::endl;
                         std::cout<<"   =========================================================="<<std::endl;
                         return 0;
 
@@ -202,7 +208,7 @@ int main() {
                     }
                 default:
                     std::cout<<"   =========================================================="<<std::endl;
-                    std::cout << "                Invalid choice!" << std::endl;
+                    std::cout << "               - Invalid choice!" << std::endl;
                     std::cout<<"   =========================================================="<<std::endl;
                     break;
 
@@ -210,9 +216,9 @@ int main() {
                 }
         }
         
-        std::cout << "Test complete\n";
+        std::cout << "     Test complete\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << "\n";
+        std::cerr << "      Error: " << e.what() << "\n";
         return 1;
     }
     

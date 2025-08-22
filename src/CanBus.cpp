@@ -83,8 +83,14 @@ bool CanBus::init() {
         close(socket_fd);
         return false;
     }
+    std::cout<<"   =========================================================="<<std::endl;
+    std::cout<<"   "<<std::endl;
 
-    std::cout << "CAN socket initialized\n";
+    std::cout << "  ==============    CAN socket initialized!  ===============\n";
+    std::cout<<"   "<<std::endl;
+
+    std::cout<<"   =========================================================="<<std::endl;
+
     return true;
 #else
     std::cerr << "CAN init only supported on Linux\n";
@@ -95,7 +101,7 @@ bool CanBus::init() {
 void CanBus::send(Can &frame) {
 #ifdef __linux__
     if (socket_fd < 0) {
-        std::cerr << "CAN socket not initialized\n";
+        std::cerr << "  -> CAN socket not initialized\n";
         return;
     }
 
@@ -111,10 +117,7 @@ void CanBus::send(Can &frame) {
     
     if (write(socket_fd, &raw_frame, sizeof(raw_frame)) != sizeof(raw_frame)) {
         perror("CAN write error");
-    } else {
-        std::cout << "Sent CAN frame ID: 0x" << std::hex << frame.getId() 
-                  << " DLC: " << std::dec << data.size() << "\n";
-    }
+    } 
 #endif
 }
 
@@ -160,7 +163,7 @@ void CanBus::closeSocket() {
     if (socket_fd >= 0) {
         close(socket_fd);
         socket_fd = -1;
-        std::cout << "CAN socket closed\n";
+        std::cout << "          CAN socket closed!\n";
     }
 #endif
 }
