@@ -62,7 +62,7 @@ void CanTp::sendSingleFrame(const std::string &message) {
     std::cout<<"        -> Sending single frame with Id : "<< txId_<<std::endl;
     uint8_t pci = (0x00 << 4) | (message.size() & 0x0F);
     data.push_back(pci);
-    std::cout<< "   -> The PCI : "<<pci<<std::endl;
+    std::cout<< "   -> The PCI : "<<static_cast<int>(pci)<<std::endl;
     data.insert(data.end(), message.begin(), message.end());
     std::cout<<"    -> The Single frame DATA : "<< data.data()<<std::endl;
     Can frame(txId_, data);
@@ -235,14 +235,14 @@ std::string CanTp::receiveMessage() {
             if (length > 0 && data.size() > 1) {
                 std::cout<<"=========== Received single frame =========="<<std::endl;
                 frame.print();
-                return std::string(data.begin() + 1, data.begin() + 1 + length);
+                return "            "+std::string(data.begin() + 1, data.begin() + 1 + length);
             }
         }
         else { 
             if (frameType == 0x1) {// First Frame
             // Extract length
             this->receivingTotalLength = ((pci & 0x0F) << 8) | data[1];
-            std::cout<< receivingTotalLength<<std::endl;
+
             this->receivingBuffer.clear();
             this->receivingBuffer.insert(this->receivingBuffer.end(), data.begin() + 2, data.end());
             this->receivingOffset = data.size() - 2;
@@ -319,7 +319,7 @@ std::string CanTp::receiveMessage() {
                           << ", progress: " << receivingOffset << "/" 
                           << receivingTotalLength << "\n";
                 std::cout<<"   "<<std::endl;
-                std::cout<<"   =========================================================="<<std::endl;
+    
                 cf.print();
                 std::cout<<"   =========================================================="<<std::endl;
                 std::cout<<"   "<<std::endl;
@@ -356,9 +356,9 @@ void CanTp::sendFlowControl(uint8_t flowStatus, uint8_t blockSize,
     fcFrame.setFrameType(targetId > 0x7FF);
     std::cout<<"   =========================================================="<<std::endl;
     std::cout<<"   ==========       Sending Flow Control Frame      ========="<<std::endl;
-    std::cout<<"   =========================================================="<<std::endl;
     std::cout<<"   "<<std::endl;
-    std::cout<<"   =========================================================="<<std::endl;
+    std::cout<<"   "<<std::endl;
+
 
     fcFrame.print();
     std::cout<<"   =========================================================="<<std::endl;
