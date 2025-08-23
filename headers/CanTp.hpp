@@ -9,9 +9,12 @@
 class CanTp 
 {
 public:
+
     CanTp(uint32_t txId, uint32_t rxId, CanBus &bus);
     CanTp(uint32_t txId, uint32_t rxId);
     ~CanTp();
+    const static uint8_t staticBS = static_cast<uint8_t>(16);
+    const static uint8_t staticST = static_cast<uint8_t>(100);
 
     void sendMessage(const std::string &message);
     void sendMessageP(const std::string &message);
@@ -19,6 +22,24 @@ public:
 
     void setbusManager(CanBus &bus) { busTp_ = bus; }
     CanBus &getbus() { return busTp_; }
+    void setRx(int rx){
+        this->rxId_ = static_cast<uint16_t>(rx);
+    }
+    void setTx(int tx){
+        this->txId_ = static_cast<uint16_t>(tx);
+    }
+    void setbs(uint8_t b){
+        this->bs=b;
+    }
+    uint8_t getbs(){
+        return this->bs;
+    }
+    void setst(uint8_t s){
+        this->st = s;
+    }
+    uint8_t getst(){
+        return this->st;
+    }
 
 private:
     std::string receiveCon(int& retryCount);
@@ -45,6 +66,8 @@ private:
     size_t receivingOffset = 0;
     uint8_t receivingSequence = 1;
     std::vector<uint8_t> receivingBuffer;
+    uint8_t bs= 8;
+    uint8_t st = 10;
 };
 
 #endif // CAN_TP_HPP

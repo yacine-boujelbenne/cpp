@@ -12,10 +12,10 @@
 #endif
 
 
-#include "../headers/Can.hpp"
-#include "../headers/CanTp.hpp"
-#include "../headers/Sender.hpp"
-#include "../headers/Receiver.hpp"
+#include "./headers/Can.hpp"
+#include "./headers/CanTp.hpp"
+#include "./headers/Sender.hpp"
+#include "./headers/Receiver.hpp"
 
 
 void demonstrateBasicCanCommunication()
@@ -124,6 +124,7 @@ void runInteractiveDemo()
                     val = 0;
                 if (val > 255)
                     val = 255;
+                    
                 data.push_back(static_cast<uint8_t>(val));
             }
 

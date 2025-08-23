@@ -3,6 +3,7 @@
 
 
 #include <cstdint>
+#include <string>
 #include "CanTp.hpp"
 
 class Receiver 
@@ -10,6 +11,7 @@ class Receiver
 private:
 std::string ECUName;
 bool availability;
+std::string message;
 public:
     Receiver(std::string name, bool available);
     ~Receiver();
@@ -21,6 +23,12 @@ public:
     bool isAvailable() const;
     uint32_t getValue() const;
     void setValue(int32_t value);
+    void setmessage(std::string m){
+        this->message = m;
+    }
+    std::string getmessage(){
+        return this->message;
+    }
 };
 
 #endif

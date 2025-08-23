@@ -11,28 +11,26 @@ Receiver::Receiver(std::string name, bool available)
     availability = available; // Initialize availability
     ECUName = name;
     // Initialize CanManager reference
-    std::cout << "Receiver constructor called with name: " << getEcuName() << std::endl;
+    std::cout << "      -> Receiver intiallized with name: " << getEcuName() << std::endl;
 }
 
 Receiver::~Receiver()
 {
-    std::cout << "Receiver destructor called" << std::endl;
+    std::cout << "  " << std::endl;
 }
 
 void Receiver::receiveEcuData(CanTp &tp)
 {
-    int rep =1;
-    while (this->isAvailable())
-    {
 
-        std::cout << "ECU is available. Start receiving...." << std::endl;
-        std::cout<<tp.receiveMessage()<<std::endl;
-
-    }
+        std::cout << "      -> ECU is available!"<<std::endl<<"      -> Start receiving...." << std::endl;
+        
+        this->setmessage(tp.receiveMessage());
+        std::cout<<this->getmessage()<<std::endl;
+    
     
     if (this->isAvailable()==false)
     {
-        std::cout << "ECU is not available. Cannot receive data." << std::endl;
+        std::cout << "      -> ECU is not available. Cannot receive data!" << std::endl;
 
     }
     
@@ -61,5 +59,5 @@ uint32_t Receiver::getValue() const
 void Receiver::setValue(int32_t value)
 {
     // Placeholder implementation, should be overridden in derived classes
-    std::cout << "Setting value in Receiver class is not implemented." << std::endl;
+    std::cout << "      -> Setting value in Receiver class is not implemented!" << std::endl;
 }

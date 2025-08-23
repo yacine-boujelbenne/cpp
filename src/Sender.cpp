@@ -15,34 +15,34 @@ Sender::Sender(const std::string &name, bool available)// Assuming CanManager is
     ECUName = name;
 
     // Initialize CanManager reference
-
-    std::cout << "Sender constructor called with name: " << getEcuName() << std::endl;
 }
 
 Sender::~Sender()
 {
-    std::cout << "Sender destructor called" << std::endl;
+    std::cout << "  " << std::endl;
 }
 void Sender::sendEcuData(std::string &msg, CanTp &tp)
 {
-    std::cout << "Sending data from Sender ECU: " << getEcuName() << std::endl;
+    std::cout << "      -> Sending data from Sender ECU: " << getEcuName() << std::endl;
     // Simulate sending data
     if (this->isAvailable())
     {
 
-        std::cout << "ECU is available. Sent data: " << msg << std::endl;
+        std::cout << "      -> ECU is available."<<std::endl<<"      -> Sent data: " << msg << std::endl;
         tp.sendMessageP(msg);
-        std::cout << "Ecu sender has sent the data to the CanManager\n";
     }
     else
     {
-        std::cout << "ECU is not available. Cannot send data." << std::endl;
+        std::cout << "      -> ECU is not available. Cannot send data!" << std::endl;
     }
 }
 void Sender::setEcuName(const std::string &name)
 {
     ECUName = name;
-    std::cout << "Sender ECU name set to: " << ECUName << std::endl;
+    std::cout<<"   =========================================================="<<std::endl;
+    std::cout << "      ->Sender ECU name set to: " << ECUName << std::endl;
+    std::cout<<"   =========================================================="<<std::endl;
+
 }
 std::string Sender::getEcuName() const
 {
@@ -64,5 +64,5 @@ uint32_t Sender::getValue() const
 void Sender::setValue(int32_t value)
 {
     // Implement your specific logic here
-    std::cout << "Setting value in Sender: " << value << std::endl;
+    std::cout << "  -> Setting value in Sender: " << value << std::endl;
 }

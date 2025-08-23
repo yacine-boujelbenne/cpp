@@ -1,55 +1,32 @@
 cmake_minimum_required(VERSION 3.14)
-project(CanDemo)
-
-# Download and build Google Test
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.14.0
-)
-FetchContent_MakeAvailable(googletest)
+project(CanTpProject LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Include headers directory
+# Include headers
 include_directories(headers)
 
-# Create library from source files
-add_library(CanLib STATIC
-    src/Can.cpp
-    src/CanBus.cpp
-    src/CanTp.cpp
-    src/Receiver.cpp
-    src/Sender.cpp
-)
+# Collect source files
+file(GLOB SRC_FILES src/*.cpp)
 
-# Main executable
-add_executable(Main src/Main.cpp)
-target_link_libraries(Main CanLib)
+# Build main library
+add_library(cantp_lib ${SRC_FILES})
 
-# Unit test configuration
+# -------- GoogleTest ----------
+add_subdirectory(googletest)   # assumes you cloned gtest here
 enable_testing()
 
-# Create unit test executable
-add_executable(UnitTests
-    tests/test_Can.cpp
-    tests/test_CanBus.cpp
-    tests/test_CanTp.cpp
-    tests/test_Receiver.cpp
-    tests/test_Sender.cpp
-)
+# -------- Tests ---------------
+file(GLOB TEST_SRC tests/*.cpp)
 
-# Link test executable with library and Google Test
-target_link_libraries(UnitTests
-    CanLib
-    GTest::gtest_main
+add_executable(run_tests ${TEST_SRC})
+
+target_link_libraries(run_tests
+    cantp_lib
+    gtest
+    gtest_main
     pthread
 )
 
-# Add Google Test discovery
-include(GoogleTest)
-gtest_discover_tests(UnitTests
-    EXTRA_ARGS --gtest_output=xml:test_results.xml
-)
+add_test(NAME CanTpTests COMMAND run_tests)
